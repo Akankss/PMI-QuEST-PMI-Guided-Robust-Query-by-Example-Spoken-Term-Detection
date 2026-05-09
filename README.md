@@ -64,8 +64,3 @@ Smith-Waterman reranking → ranked list     O(C·m·n̄)
 | C (HNSW candidates) | 200 | MAP grows up to C=200 |
 | SW: m₊ / m₋ / g | +2 / −1 / −2 | Match / mismatch / gap |
 | HNSW M | 16 | ef_construction=150, ef_search=200 |
-
-
-  note    = {Under review}
-}
-```
