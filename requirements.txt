@@ -1,0 +1,22 @@
+# ── Core numerical stack ──────────────────────────────────────────────────────
+numpy>=1.24
+scipy>=1.10
+
+# ── Machine learning ──────────────────────────────────────────────────────────
+scikit-learn>=1.3          # TF-IDF, NearestNeighbors fallback
+
+# ── Approximate nearest-neighbour search (required for paper-accurate HNSW) ──
+hnswlib>=0.7               # pip install hnswlib
+
+# ── Speech / audio ───────────────────────────────────────────────────────────
+torch>=2.0
+torchaudio>=2.0
+transformers>=4.38         # HuBERT, WavLM, wav2vec2
+soundfile>=0.12
+tqdm>=4.66
+
+# ── Plotting ──────────────────────────────────────────────────────────────────
+matplotlib>=3.8
+
+# ── Utilities ─────────────────────────────────────────────────────────────────
+pyyaml>=6.0
