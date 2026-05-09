@@ -1,6 +1,6 @@
 # PMI-QuEST: PMI-Guided Robust Query-by-Example Spoken Term Detection
 
-> **IEEE TASLP** (under review) · Akanksha Singh · Vipul Arora (IIT Kanpur / KU Leuven) · Yi-Ping Phoebe Chen (La Trobe University)
+> **IEEE TASLP** (under review) · Akanksha Singh ( IIT Kanpur and La Trobe University) · Yi-Ping Phoebe Chen (La Trobe University) · Vipul Arora (IIT Kanpur / KU Leuven)
 
 ---
 
