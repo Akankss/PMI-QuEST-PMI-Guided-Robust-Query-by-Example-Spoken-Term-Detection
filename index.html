@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PMI-QuEST — Interactive Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Design system ──────────────────────────────────── */
+:root {
+  --bg:       #0d0f14;
+  --bg2:      #161922;
+  --bg3:      #1e2230;
+  --border:   #2a2f3f;
+  --border2:  #363d52;
+  --text:     #e4e7f0;
+  --text2:    #8891a8;
+  --text3:    #555f78;
+  --accent:   #7c9eff;
+  --accent2:  #a78bfa;
+  --green:    #4ade80;
+  --amber:    #fbbf24;
+  --red:      #f87171;
+  --mono:     'IBM Plex Mono', monospace;
+  --serif:    'DM Serif Display', Georgia, serif;
+  --sans:     'DM Sans', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 28px 40px 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.header-left { display: flex; flex-direction: column; gap: 4px; }
+.header-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.header-title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.2;
+}
+.header-title span { font-style: normal; color: var(--accent); }
+.header-sub { font-size: 13px; color: var(--text2); margin-top: 2px; }
+.header-badge {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  padding: 4px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.header-badge a { color: var(--accent); text-decoration: none; }
+.header-badge a:hover { text-decoration: underline; }
+
+/* ── Tab bar ─────────────────────────────────────────── */
+.tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab-btn {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text3);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 14px 18px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+  letter-spacing: .01em;
+}
+.tab-btn:hover { color: var(--text2); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Page layout ─────────────────────────────────────── */
+.page { display: none; padding: 36px 40px; max-width: 1100px; }
+.page.active { display: block; }
+
+/* ── Section heads ──────────────────────────────────── */
+.sec-title {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-style: italic;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.sec-sub {
+  font-size: 13px;
+  color: var(--text2);
+  margin-bottom: 28px;
+  max-width: 680px;
+  line-height: 1.7;
+}
+
+/* ── Cards ───────────────────────────────────────────── */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+}
+.card-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.card p { font-size: 14px; color: var(--text2); line-height: 1.7; }
+
+/* ── Grid ────────────────────────────────────────────── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+@media(max-width:720px) { .grid2,.grid3 { grid-template-columns: 1fr; } }
+
+/* ── Tables ──────────────────────────────────────────── */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 8px 12px; border: 1px solid var(--border); text-align: center; }
+th {
+  background: var(--bg3);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  font-weight: 500;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+td { color: var(--text); }
+td.hi { color: var(--green); font-weight: 600; background: #14271d; }
+td.med { color: var(--amber); background: #26200d; }
+td.lo { color: var(--text3); }
+td.best { color: var(--accent); font-weight: 600; }
+tr.proposed td { border-color: var(--accent2); }
+tr.proposed td:first-child { border-left: 3px solid var(--accent2); }
+
+/* ── Math / mono display ─────────────────────────────── */
+.math {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin: 10px 0;
+  color: var(--text);
+  line-height: 1.9;
+}
+.math .comment { color: var(--text3); font-style: italic; }
+code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+/* ── Step navigator (wonder walkthrough) ─────────────── */
+.step-nav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.step-btn {
+  font-family: var(--mono);
+  font-size: 12px;
+  padding: 7px 14px;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  transition: all .15s;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.step-btn:hover { color: var(--text2); border-color: var(--text3); }
+.step-btn.done { color: var(--green); border-color: #1f4a2a; }
+.step-btn.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Panels (shared between walkthrough steps and other tabs) */
+.panel { display: none; animation: fadein .2s ease; }
+.panel.active { display: block; }
+@keyframes fadein { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+
+/* ── Token boxes ─────────────────────────────────────── */
+.token-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.tok {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--accent);
+}
+.tok.hi { background: #14271d; border-color: var(--green); color: var(--green); }
+.tok.word { color: var(--text2); font-weight: 400; font-size: 13px; background: transparent; border: none; padding: 6px 0; }
+.arrow-sym { color: var(--text3); font-size: 18px; }
+
+/* ── Bigram badge ────────────────────────────────────── */
+.bigram-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: var(--mono);
+  font-size: 13px;
+  margin: 3px;
+}
+.bigram-pair .sep { color: var(--text3); margin: 0 2px; }
+.bigram-pair.pass { border-color: var(--green); color: var(--green); background: #14271d; }
+.bigram-pair.fail { border-color: var(--red); color: var(--red); background: #251414; opacity:.7; }
+.bigram-pair.neutral { border-color: var(--amber); color: var(--amber); background: #26200d; }
+
+/* ── Matrix cell ─────────────────────────────────────── */
+.mat-hi { background: #14271d; color: var(--green); font-weight: 600; }
+.mat-med { background: #26200d; color: var(--amber); }
+
+/* ── Insight / warn boxes ───────────────────────────── */
+.insight {
+  background: #1a2340;
+  border: 1px solid #2d4a7a;
+  border-radius: 6px;
+  padding: 11px 15px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--accent);
+  line-height: 1.6;
+}
+.warn-box {
+  background: #26200d;
+  border: 1px solid #4a3510;
+  border-radius: 6px;
+  padding: 11px 15px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--amber);
+  line-height: 1.6;
+}
+
+/* ── Corpus grid ─────────────────────────────────────── */
+.corpus-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 8px; margin-top: 10px; }
+.corpus-doc {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  position: relative;
+  transition: border-color .15s;
+}
+.corpus-doc:hover { border-color: var(--border2); }
+.corpus-doc.relevant { border-color: #2d4a7a; }
+.corpus-doc .doc-id { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-bottom: 5px; }
+.corpus-doc .doc-text { font-size: 12.5px; color: var(--text2); line-height: 1.5; }
+.corpus-doc .doc-text em { color: var(--accent); font-style: normal; font-weight: 600; }
+.corpus-doc .rel-tag {
+  position: absolute; top: 8px; right: 8px;
+  font-size: 10px; font-family: var(--mono);
+  background: #1a2340; color: var(--accent);
+  padding: 2px 6px; border-radius: 4px;
+}
+
+/* ── Pipeline flow ──────────────────────────────────── */
+.pipeline-flow { display: flex; align-items: center; flex-wrap: wrap; margin: 14px 0; gap: 0; }
+.pf-step {
+  font-size: 12px; color: var(--text3); font-family: var(--mono);
+  padding: 5px 10px; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 4px; white-space: nowrap;
+}
+.pf-step.active { color: var(--accent); border-color: #2d4a7a; background: #1a2340; }
+.pf-step.done { color: var(--green); border-color: #1f4a2a; }
+.pf-arr { color: var(--text3); font-size: 14px; padding: 0 5px; }
+
+/* ── Nav buttons ─────────────────────────────────────── */
+.btn-row { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+.btn {
+  padding: 8px 18px;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  background: transparent; color: var(--text2);
+  font-size: 13px; cursor: pointer;
+  font-family: var(--sans);
+  transition: all .15s;
+}
+.btn:hover { background: var(--bg2); color: var(--text); }
+.btn.primary { background: #1a2340; border-color: #2d4a7a; color: var(--accent); }
+.btn.primary:hover { opacity: .85; }
+
+/* ── Metric stat blocks ─────────────────────────────── */
+.stat-block { text-align: center; padding: 16px; }
+.stat-num { font-family: var(--serif); font-size: 34px; color: var(--accent); line-height: 1; margin-bottom: 4px; }
+.stat-label { font-family: var(--mono); font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; }
+.stat-delta { font-family: var(--mono); font-size: 11px; color: var(--green); margin-top: 2px; }
+
+/* ── Progress bars ───────────────────────────────────── */
+.bar-row { margin: 10px 0; }
+.bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-family: var(--mono); }
+.bar-track { height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; }
+.bar-blue { background: var(--accent); }
+.bar-purple { background: var(--accent2); }
+.bar-green { background: var(--green); }
+.bar-amber { background: var(--amber); }
+
+/* ── Language grid ───────────────────────────────────── */
+.lang-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
+@media(max-width:720px) { .lang-grid { grid-template-columns: repeat(2,1fr); } }
+.lang-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 14px 12px; }
+.lang-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
+.lang-family { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
+.lang-map { font-size: 20px; color: var(--accent); font-weight: 600; font-family: var(--mono); }
+.lang-gain { font-size: 11px; color: var(--green); font-family: var(--mono); margin-top: 2px; }
+
+/* ── Algorithm block ─────────────────────────────────── */
+.algo {
+  font-family: var(--mono); font-size: 12.5px; line-height: 2;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px 24px; color: var(--text);
+}
+.algo .kw { color: var(--accent2); font-weight: 600; }
+.algo .fn { color: var(--accent); }
+.algo .cmt { color: var(--text3); font-style: italic; }
+.algo .indent1 { padding-left: 24px; }
+.algo .indent2 { padding-left: 48px; }
+
+/* ── Divider + Footnote ─────────────────────────────── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+.footnote { font-size: 12px; color: var(--text3); border-top: 1px solid var(--border); padding-top: 16px; margin-top: 24px; }
+.footnote a { color: var(--accent); text-decoration: none; }
+.footnote a:hover { text-decoration: underline; }
+
+/* ── PMI vs BPE comparison bars ─────────────────────── */
+.compare-row { display: grid; grid-template-columns: 80px 1fr 1fr; gap: 8px; align-items: center; font-size: 13px; margin: 6px 0; }
+.compare-row .metric-name { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+.compare-bar { position: relative; height: 28px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+.compare-bar-fill {
+  position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px;
+  display: flex; align-items: center; padding-left: 8px;
+  font-family: var(--mono); font-size: 11px; font-weight: 600; white-space: nowrap;
+}
+.cb-pmi { background: linear-gradient(90deg, #3b6bcc, var(--accent)); color: var(--bg); }
+.cb-bpe { background: linear-gradient(90deg, #5b4a7a, var(--accent2)); color: var(--bg); }
+
+/* ── Responsive ──────────────────────────────────────── */
+@media(max-width:600px) {
+  .site-header, .tab-bar, .page { padding-left: 16px; padding-right: 16px; }
+  .sec-title { font-size: 18px; }
+  .corpus-grid { grid-template-columns: 1fr; }
+  table { font-size: 11px; }
+  th, td { padding: 5px 7px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════════ -->
+<header class="site-header">
+  <div class="header-left">
+    <div class="header-eyebrow">IEEE TASLP · QbE-STD</div>
+    <div class="header-title"><span>PMI-QuEST</span> — Interactive Paper Demo</div>
+    <div class="header-sub">PMI-Guided Robust Query-by-Example Spoken Term Detection</div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+    <div class="header-badge">
+      <a href="https://github.com/Akankss/PMI-QuEST-PMI-Guided-Robust-Query-by-Example-Spoken-Term-Detection" target="_blank">★ GitHub</a>
+    </div>
+    <div class="header-badge">LibriSpeech MAP = <span style="color:var(--green);font-weight:600">0.7867</span></div>
+  </div>
+</header>
+
+<!-- ══ TAB BAR ═════════════════════════════════════════════════ -->
+<nav class="tab-bar">
+  <button class="tab-btn active" onclick="showTab(0)">① Pipeline Walkthrough</button>
+  <button class="tab-btn" onclick="showTab(1)">② PMI Bigram Discovery</button>
+  <button class="tab-btn" onclick="showTab(2)">③ PMI vs BPE</button>
+  <button class="tab-btn" onclick="showTab(3)">④ Results</button>
+  <button class="tab-btn" onclick="showTab(4)">⑤ Cross-Lingual</button>
+  <button class="tab-btn" onclick="showTab(5)">⑥ Algorithm</button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PAGE 0 — Pipeline walkthrough ("wonder" example)
+═══════════════════════════════════════════════════════════════ -->
+<div class="page active" id="tab0">
+  <div class="sec-title">Step-by-Step Pipeline</div>
+  <div class="sec-sub">Trace the spoken query <code>"wonder"</code> through the full PMI-QuEST pipeline: query &amp; corpus setup → tokenisation → PMI bigram selection → vector building → HNSW retrieval → Smith-Waterman reranking → final results. The phonetically similar distractor <em>"wander"</em> is used to show where weaker systems fail.</div>
+
+  <!-- Step pills -->
+  <div class="step-nav" id="wonder-pills">
+    <button class="step-btn active" onclick="goWonder(0)">① Query &amp; corpus</button>
+    <button class="step-btn" onclick="goWonder(1)">② Tokenise</button>
+    <button class="step-btn" onclick="goWonder(2)">③ PMI bigrams</button>
+    <button class="step-btn" onclick="goWonder(3)">④ Build vector</button>
+    <button class="step-btn" onclick="goWonder(4)">⑤ HNSW search</button>
+    <button class="step-btn" onclick="goWonder(5)">⑥ SW reranking</button>
+    <button class="step-btn" onclick="goWonder(6)">⑦ Top 5 results</button>
+  </div>
+
+  <!-- ── WONDER STEP 0: Query & Corpus ─────────────────── -->
+  <div class="panel active" id="w0">
+    <div class="card">
+      <div class="card-title">Step 01 of 07 — The query and the corpus</div>
+      <p>We want to find every utterance in a LibriSpeech-style corpus that contains the spoken word <strong style="color:var(--text)">"wonder"</strong>. The corpus has 12 utterances; 3 are relevant (contain "wonder").</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Spoken query</div>
+      <div class="token-row">
+        <span style="font-size:22px">🎙️</span>
+        <span style="font-size:18px;font-weight:600;color:var(--accent);font-family:var(--mono)">"wonder"</span>
+        <span class="tok word">→ raw audio waveform → SSL encoder → k-means</span>
+      </div>
+      <p>A 0.8-second clip. The WavLM-base layer-7 encoder will turn this into a token sequence in the next step.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Corpus (N = 12 utterances, Q = 1 query)</div>
+      <div class="corpus-grid">
+        <div class="corpus-doc relevant">
+          <div class="doc-id">doc_001</div>
+          <div class="doc-text">I <em>wonder</em> what time it is</div>
+          <span class="rel-tag">relevant</span>
+        </div>
+        <div class="corpus-doc">
+          <div class="doc-id">doc_002</div>
+          <div class="doc-text">the cat sat on the mat</div>
+        </div>
+        <div class="corpus-doc relevant">
+          <div class="doc-id">doc_003</div>
+          <div class="doc-text">she said it made her <em>wonder</em></div>
+          <span class="rel-tag">relevant</span>
+        </div>
+        <div class="corpus-doc">
+          <div class="doc-id">doc_004</div>
+          <div class="doc-text">birds fly over the mountains</div>
+        </div>
+        <div class="corpus-doc">
+          <div class="doc-id">doc_005</div>
+          <div class="doc-text">the quick brown fox jumps</div>
+        </div>
+        <div class="corpus-doc relevant">
+          <div class="doc-id">doc_006</div>
+          <div class="doc-text">no <em>wonder</em> the sky looks dark</div>
+          <span class="rel-tag">relevant</span>
+        </div>
+        <div class="corpus-doc">
+          <div class="doc-id">doc_007</div>
+          <div class="doc-text">she walked along the river</div>
+        </div>
+        <div class="corpus-doc">
+          <div class="doc-id">doc_008</div>
+          <div class="doc-text">he played piano for hours</div>
+        </div>
+        <div class="corpus-doc">
+          <div class="doc-id">doc_009</div>
+          <div class="doc-text">the train arrived at noon</div>
+        </div>
+        <div class="corpus-doc">
+          <div class="doc-id">doc_010</div>
+          <div class="doc-text">light fell through the window</div>
+        </div>
+        <div class="corpus-doc">
+          <div class="doc-id">doc_011</div>
+          <div class="doc-text">thunder rolled across the plain</div>
+        </div>
+        <div class="corpus-doc">
+          <div class="doc-id">doc_012</div>
+          <div class="doc-text">wander through the old town square</div>
+        </div>
+      </div>
+      <div class="insight" style="margin-top:12px">doc_012 "wander" is a phonetically similar <em>distractor</em> — it shares many acoustic frames with "wonder". A weak system may retrieve it. PMI-QuEST must rank the 3 relevant docs above it.</div>
+    </div>
+
+    <div class="btn-row"><button class="btn primary" onclick="goWonder(1)">Start pipeline →</button></div>
+  </div>
+
+  <!-- ── WONDER STEP 1: Tokenise ────────────────────────── -->
+  <div class="panel" id="w1">
+    <div class="card">
+      <div class="card-title">Step 02 of 07 — Tokenise the query</div>
+      <p>WavLM-base layer 7 extracts frame embeddings at 50 Hz. Each frame is assigned to its nearest k-means centroid (K = 512). Consecutive duplicate tokens are collapsed to give a compact token sequence.</p>
+    </div>
+
+    <div class="pipeline-flow">
+      <span class="pf-step active">SSL encoder</span><span class="pf-arr">→</span>
+      <span class="pf-step">k-means (K=512)</span><span class="pf-arr">→</span>
+      <span class="pf-step">dedup</span><span class="pf-arr">→</span>
+      <span class="pf-step">s_q</span>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Frame-level centroid assignments (50 Hz, ~40 frames for "wonder")</div>
+      <div class="math">
+        t_i = argmin<sub>c∈𝒱</sub> ‖h_i − μ_c‖₂<br><br>
+        Frames 0–6  : centroid <b style="color:var(--accent)">271</b>&nbsp; <span class="comment">// onset /w/</span><br>
+        Frames 7–14 : centroid <b style="color:var(--accent)">089</b>&nbsp; <span class="comment">// vowel /ʌ/</span><br>
+        Frames 15–20: centroid <b style="color:var(--accent)">089</b>&nbsp; <span class="comment">// (duplicate, collapsed)</span><br>
+        Frames 21–27: centroid <b style="color:var(--accent)">314</b>&nbsp; <span class="comment">// nasal /n/</span><br>
+        Frames 28–33: centroid <b style="color:var(--accent)">452</b>&nbsp; <span class="comment">// /d/</span><br>
+        Frames 34–39: centroid <b style="color:var(--accent)">177</b>&nbsp; <span class="comment">// coda /ɚ/</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Query token sequence after deduplication</div>
+      <div class="token-row">
+        <span class="tok word">/w/</span><span class="arrow-sym">→</span><span class="tok">271</span>
+        <span class="tok word">&nbsp;&nbsp;/ʌ/</span><span class="arrow-sym">→</span><span class="tok">089</span>
+        <span class="tok word">&nbsp;&nbsp;/n/</span><span class="arrow-sym">→</span><span class="tok">314</span>
+        <span class="tok word">&nbsp;&nbsp;/d/</span><span class="arrow-sym">→</span><span class="tok">452</span>
+        <span class="tok word">&nbsp;&nbsp;/ɚ/</span><span class="arrow-sym">→</span><span class="tok">177</span>
+      </div>
+      <div class="math">s_q = [271, 089, 314, 452, 177] &nbsp; |s_q| = 5</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">How corpus docs tokenise (the same encoder)</div>
+      <div style="overflow-x:auto">
+      <table>
+        <tr><th>Doc</th><th>Utterance</th><th>Token sequence</th></tr>
+        <tr class="proposed"><td>doc_001</td><td style="text-align:left">I <em style="color:var(--accent)">wonder</em> what time it is</td><td style="font-family:var(--mono);font-size:11px;text-align:left">[103, 271, 089, 314, 452, 177, 203, 88, 55]</td></tr>
+        <tr><td>doc_002</td><td style="text-align:left">the cat sat on the mat</td><td style="font-family:var(--mono);font-size:11px;text-align:left">[88, 44, 201, 67, 88, 44]</td></tr>
+        <tr class="proposed"><td>doc_003</td><td style="text-align:left">she said it made her <em style="color:var(--accent)">wonder</em></td><td style="font-family:var(--mono);font-size:11px;text-align:left">[55, 201, 55, 103, 271, 089, 314, 452, 177]</td></tr>
+        <tr><td>doc_004</td><td style="text-align:left">birds fly over the mountains</td><td style="font-family:var(--mono);font-size:11px;text-align:left">[390, 72, 211, 88, 502]</td></tr>
+        <tr><td>doc_012</td><td style="text-align:left">wander through the old town</td><td style="font-family:var(--mono);font-size:11px;text-align:left">[271, 044, 314, 452, 177, 88, 330]</td></tr>
+      </table>
+      </div>
+      <div class="warn-box" style="margin-top:10px">doc_012 "wander" shares tokens [271, 314, 452, 177] with the query — it's missing 089 (/ʌ/) and has an extra 044. Unigram TF-IDF can't see this substitution. PMI bigrams and SW can.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="goWonder(0)">← Back</button>
+      <button class="btn primary" onclick="goWonder(2)">Next: PMI bigrams →</button>
+    </div>
+  </div>
+
+  <!-- ── WONDER STEP 2: PMI Bigrams ─────────────────────── -->
+  <div class="panel" id="w2">
+    <div class="card">
+      <div class="card-title">Step 03 of 07 — Select PMI bigrams</div>
+      <p>PMI measures how much more adjacent token pairs co-occur than expected under independence. Only pairs exceeding threshold τ = 0.5 enter the index.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">PMI formula</div>
+      <div class="math">PMI(a,b) = log &nbsp; p(a,b) / (p(a)·p(b))<br><br>
+<span class="comment">// p(a,b) = adjacent-pair corpus frequency</span><br>
+<span class="comment">// PMI &gt; 0 : appear together more than chance → kept if &gt; τ</span><br>
+<span class="comment">// PMI ≤ 0 : accidental adjacency → discarded</span><br><br>
+𝒷_τ = { (a,b) ∈ 𝒱² : PMI(a,b) &gt; τ }</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Bigrams from s_q = [271, 089, 314, 452, 177]</div>
+      <div style="overflow-x:auto">
+      <table>
+        <tr><th>Bigram</th><th>Joint meaning</th><th>PMI</th><th>IDF(bigram)</th><th>Decision</th></tr>
+        <tr><td style="font-family:var(--mono)">(271→089)</td><td style="text-align:left;font-size:12px">/w/→/ʌ/ onset of "wonder/wander"</td><td class="med">0.38</td><td>2.1</td><td style="color:var(--red);font-size:12px">✗ below τ=0.5</td></tr>
+        <tr><td style="font-family:var(--mono)">(089→314)</td><td style="text-align:left;font-size:12px">/ʌ/→/n/ specific to "wonder"</td><td class="hi">1.82</td><td>3.4</td><td style="color:var(--green);font-size:12px;font-weight:600">✓ kept</td></tr>
+        <tr><td style="font-family:var(--mono)">(314→452)</td><td style="text-align:left;font-size:12px">/n/→/d/ in "wonder","under"</td><td class="hi">1.45</td><td>2.8</td><td style="color:var(--green);font-size:12px;font-weight:600">✓ kept</td></tr>
+        <tr><td style="font-family:var(--mono)">(452→177)</td><td style="text-align:left;font-size:12px">/d/→/ɚ/ rhotic coda</td><td class="hi">2.10</td><td>3.1</td><td style="color:var(--green);font-size:12px;font-weight:600">✓ kept</td></tr>
+      </table>
+      </div>
+      <div class="insight" style="margin-top:10px">3 of 4 bigrams pass. The failing bigram (271→089) is the /w/→/ʌ/ onset shared with "wander" — correctly excluded as less statistically surprising. The surviving bigrams (089→314), (314→452), (452→177) are specific to the vowel+nasal+stop+rhotic sequence of "wonder".</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Active bigrams in query vector</div>
+      <span class="bigram-pair fail">271<span class="sep">→</span>089 <small style="margin-left:4px">PMI 0.38</small></span>
+      <span class="bigram-pair pass">089<span class="sep">→</span>314 <small style="margin-left:4px">PMI 1.82</small></span>
+      <span class="bigram-pair pass">314<span class="sep">→</span>452 <small style="margin-left:4px">PMI 1.45</small></span>
+      <span class="bigram-pair pass">452<span class="sep">→</span>177 <small style="margin-left:4px">PMI 2.10</small></span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="goWonder(1)">← Back</button>
+      <button class="btn primary" onclick="goWonder(3)">Next: build vector →</button>
+    </div>
+  </div>
+
+  <!-- ── WONDER STEP 3: Build Vector ───────────────────── -->
+  <div class="panel" id="w3">
+    <div class="card">
+      <div class="card-title">Step 04 of 07 — Build the PMI-TF-IDF vector</div>
+      <p>Concatenate unigram TF-IDF weights with α-scaled bigram weights, then L2-normalise. The resulting vector encodes both <em>what</em> tokens appear (unigrams) and <em>in what order</em> (bigrams).</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Unigram part u_q — TF-IDF weights</div>
+      <div class="math">
+        w_uni(t, s) = (n_t(x) / |s(x)|) · log(N / (1+d_t))<br><br>
+        token 271 (/w/) : 1/5 × 2.3 = <b style="color:var(--accent)">0.46</b><br>
+        token 089 (/ʌ/) : 1/5 × 3.4 = <b style="color:var(--accent)">0.68</b>  <span class="comment">← high IDF, rare</span><br>
+        token 314 (/n/) : 1/5 × 2.8 = <b style="color:var(--accent)">0.56</b><br>
+        token 452 (/d/) : 1/5 × 2.1 = <b style="color:var(--accent)">0.42</b><br>
+        token 177 (/ɚ/) : 1/5 × 3.1 = <b style="color:var(--accent)">0.62</b>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Bigram part b_q — α = 1.0</div>
+      <div class="math">
+        w_bi((a,b), s) = (n_ab(x)/(|s|-1)) · log(N/(1+d_ab))<br><br>
+        (089→314) : 1/4 × 3.4 = 0.85 × α = <b style="color:var(--accent)">0.85</b><br>
+        (314→452) : 1/4 × 2.8 = 0.70 × α = <b style="color:var(--accent)">0.70</b><br>
+        (452→177) : 1/4 × 3.1 = 0.78 × α = <b style="color:var(--accent)">0.78</b>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Combined vector (unigrams ‖ bigrams → L2-normalise)</div>
+      <div class="math">
+        raw = [0.46, 0.68, 0.56, 0.42, 0.62 | 0.85, 0.70, 0.78]<br>
+        ‖raw‖ = √(0.21+0.46+0.31+0.18+0.38+0.72+0.49+0.61) = √3.36 ≈ 1.83<br><br>
+        <b style="color:var(--accent)">v_q ≈ [0.25, 0.37, 0.31, 0.23, 0.34, 0.46, 0.38, 0.43]</b>
+      </div>
+      <div class="insight">The bigram dimensions (089→314), (314→452), (452→177) carry the <em>highest weights</em> in v_q. Documents sharing the /ʌ/→/n/→/d/→/ɚ/ transition are strongly pulled toward the query in HNSW space.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="goWonder(2)">← Back</button>
+      <button class="btn primary" onclick="goWonder(4)">Next: HNSW search →</button>
+    </div>
+  </div>
+
+  <!-- ── WONDER STEP 4: HNSW ────────────────────────────── -->
+  <div class="panel" id="w4">
+    <div class="card">
+      <div class="card-title">Step 05 of 07 — HNSW approximate search</div>
+      <p>The HNSW index (M=16, ef_construction=150) contains PMI-TF-IDF vectors for all 12 corpus documents. We retrieve the top-C=8 candidates by cosine similarity in O(log N) time — no full scan.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Cosine similarity scores (dot product of L2-normalised vectors)</div>
+      <div style="overflow-x:auto">
+      <table>
+        <tr><th>Doc</th><th>Utterance</th><th>Key tokens shared</th><th>Cosine</th><th>Rank</th></tr>
+        <tr class="proposed"><td>doc_001</td><td style="text-align:left;font-size:12px">I <em style="color:var(--accent)">wonder</em> what time it is</td><td style="font-family:var(--mono);font-size:11px">271,089,314,452,177</td><td class="hi">0.87</td><td class="hi">1</td></tr>
+        <tr class="proposed"><td>doc_003</td><td style="text-align:left;font-size:12px">she said it made her <em style="color:var(--accent)">wonder</em></td><td style="font-family:var(--mono);font-size:11px">271,089,314,452,177</td><td class="hi">0.85</td><td class="hi">2</td></tr>
+        <tr class="proposed"><td>doc_006</td><td style="text-align:left;font-size:12px">no <em style="color:var(--accent)">wonder</em> the sky looks dark</td><td style="font-family:var(--mono);font-size:11px">271,089,314,452,177</td><td class="hi">0.83</td><td class="hi">3</td></tr>
+        <tr><td>doc_012</td><td style="text-align:left;font-size:12px">wander through the old town</td><td style="font-family:var(--mono);font-size:11px">271,314,452,177</td><td class="med">0.64</td><td>4</td></tr>
+        <tr><td>doc_011</td><td style="text-align:left;font-size:12px">thunder rolled across the plain</td><td style="font-family:var(--mono);font-size:11px">314,452</td><td class="lo">0.31</td><td>5</td></tr>
+        <tr><td>doc_004</td><td style="text-align:left;font-size:12px">birds fly over the mountains</td><td style="font-family:var(--mono);font-size:11px">177</td><td class="lo">0.18</td><td>6</td></tr>
+        <tr><td>doc_007</td><td style="text-align:left;font-size:12px">she walked along the river</td><td style="font-family:var(--mono);font-size:11px">089</td><td class="lo">0.14</td><td>7</td></tr>
+        <tr><td>doc_002</td><td style="text-align:left;font-size:12px">the cat sat on the mat</td><td style="font-family:var(--mono);font-size:11px">—</td><td class="lo">0.06</td><td>8</td></tr>
+      </table>
+      </div>
+      <div class="insight" style="margin-top:10px">All 3 relevant docs (001, 003, 006) land in the top-3 positions — PMI bigrams give them a strong edge. doc_012 "wander" sits at rank 4 because it's missing bigram (089→314). SW reranking will confirm the final order.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="goWonder(3)">← Back</button>
+      <button class="btn primary" onclick="goWonder(5)">Next: SW reranking →</button>
+    </div>
+  </div>
+
+  <!-- ── WONDER STEP 5: SW Reranking ────────────────────── -->
+  <div class="panel" id="w5">
+    <div class="card">
+      <div class="card-title">Step 06 of 07 — Smith-Waterman reranking</div>
+      <p>SW local alignment enforces full token-sequence order. Applied to the top-8 HNSW candidates. Score = max H(i,j) / m where m = max(|s_q|, |s_d|). Parameters: match +2, mismatch −1, gap −2.</p>
+      <div class="math">H(i,j) = max( 0, &nbsp; H(i-1,j-1) + σ(t_i^q, t_j^d), &nbsp; H(i-1,j)−2, &nbsp; H(i,j-1)−2 )<br>
+σ(a,b) = +2 if a=b, else −1</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">doc_001: s_d = [103, 271, 089, 314, 452, 177, 203, 88, 55]</div>
+      <div style="overflow-x:auto">
+      <table style="width:auto;min-width:500px">
+        <tr><th></th><th>—</th><th>103</th><th style="color:var(--accent)">271</th><th style="color:var(--accent)">089</th><th style="color:var(--accent)">314</th><th style="color:var(--accent)">452</th><th style="color:var(--accent)">177</th><th>203</th><th>88</th><th>55</th></tr>
+        <tr><th>—</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th style="color:var(--accent)">271</th><td>0</td><td>0</td><td class="mat-hi">2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th style="color:var(--accent)">089</th><td>0</td><td>0</td><td>0</td><td class="mat-hi">4</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th style="color:var(--accent)">314</th><td>0</td><td>0</td><td>0</td><td>2</td><td class="mat-hi">6</td><td>4</td><td>2</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th style="color:var(--accent)">452</th><td>0</td><td>0</td><td>0</td><td>0</td><td>4</td><td class="mat-hi">8</td><td>6</td><td>4</td><td>2</td><td>0</td></tr>
+        <tr><th style="color:var(--accent)">177</th><td>0</td><td>0</td><td>0</td><td>0</td><td>2</td><td>6</td><td class="mat-hi">10</td><td>8</td><td>6</td><td>4</td></tr>
+      </table>
+      </div>
+      <div class="math">max H = 10 &nbsp;&nbsp; m = max(5, 9) = 9<br><b style="color:var(--green)">SW(q, doc_001) = 10/9 = 1.00</b> <span class="comment">// capped — perfect alignment</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">doc_012 (distractor): s_d = [271, 044, 314, 452, 177, 88, 330]</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:8px">Missing token 089 (/ʌ/) — the critical /ʌ/→/n/ bigram breaks the alignment:</p>
+      <div style="overflow-x:auto">
+      <table style="width:auto;min-width:420px">
+        <tr><th></th><th>—</th><th style="color:var(--accent)">271</th><th>044</th><th style="color:var(--accent)">314</th><th style="color:var(--accent)">452</th><th style="color:var(--accent)">177</th><th>88</th><th>330</th></tr>
+        <tr><th>—</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th style="color:var(--accent)">271</th><td>0</td><td class="mat-hi">2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th style="color:var(--accent)">089</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th style="color:var(--accent)">314</th><td>0</td><td>0</td><td>0</td><td class="mat-med">2</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><th style="color:var(--accent)">452</th><td>0</td><td>0</td><td>0</td><td>0</td><td class="mat-med">4</td><td>2</td><td>0</td><td>0</td></tr>
+        <tr><th style="color:var(--accent)">177</th><td>0</td><td>0</td><td>0</td><td>0</td><td>2</td><td class="mat-med">6</td><td>4</td><td>2</td></tr>
+      </table>
+      </div>
+      <div class="math">max H = 6 &nbsp;&nbsp; m = max(5, 7) = 7<br><b style="color:var(--amber)">SW(q, doc_012) = 6/7 = 0.86</b> <span class="comment">// "wander" penalised — missing /ʌ/ broke continuity</span></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="goWonder(4)">← Back</button>
+      <button class="btn primary" onclick="goWonder(6)">See top 5 results →</button>
+    </div>
+  </div>
+
+  <!-- ── WONDER STEP 6: Results ─────────────────────────── -->
+  <div class="panel" id="w6">
+    <div class="card">
+      <div class="card-title">Step 07 of 07 — Top 5 retrieved documents</div>
+      <p>Ranked by Smith-Waterman score (descending). All 3 relevant utterances appear in the top 3. MAP = 1.0 for this query.</p>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <!-- Rank 1 -->
+      <div style="display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border)">
+        <div style="min-width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;flex-shrink:0;background:#1a2340;color:var(--accent);border:1px solid #2d4a7a">1</div>
+        <div style="flex:1">
+          <div style="font-size:14px;color:var(--text);margin-bottom:5px">I <em style="color:var(--accent);font-style:normal;font-weight:600">wonder</em> what time it is <span style="font-size:11px;color:var(--text3);margin-left:6px">doc_001</span></div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px">
+            <span style="color:var(--text3)">Tokens: <span style="color:var(--accent)">271, 089, 314, 452, 177</span> → exact</span>
+            <span style="color:var(--green)">SW = 1.00</span>
+            <span style="color:var(--text2)">HNSW = 0.87</span>
+            <span style="color:var(--green)">✓ relevant</span>
+          </div>
+        </div>
+      </div>
+      <!-- Rank 2 -->
+      <div style="display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border)">
+        <div style="min-width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;flex-shrink:0;background:#14271d;color:var(--green);border:1px solid #1f4a2a">2</div>
+        <div style="flex:1">
+          <div style="font-size:14px;color:var(--text);margin-bottom:5px">she said it made her <em style="color:var(--accent);font-style:normal;font-weight:600">wonder</em> <span style="font-size:11px;color:var(--text3);margin-left:6px">doc_003</span></div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px">
+            <span style="color:var(--text3)">Tokens: … <span style="color:var(--accent)">271, 089, 314, 452, 177</span></span>
+            <span style="color:var(--green)">SW = 1.00</span>
+            <span style="color:var(--text2)">HNSW = 0.85</span>
+            <span style="color:var(--green)">✓ relevant</span>
+          </div>
+        </div>
+      </div>
+      <!-- Rank 3 -->
+      <div style="display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border)">
+        <div style="min-width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;flex-shrink:0;background:#14271d;color:var(--green);border:1px solid #1f4a2a">3</div>
+        <div style="flex:1">
+          <div style="font-size:14px;color:var(--text);margin-bottom:5px">no <em style="color:var(--accent);font-style:normal;font-weight:600">wonder</em> the sky looks dark <span style="font-size:11px;color:var(--text3);margin-left:6px">doc_006</span></div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px">
+            <span style="color:var(--text3)">Tokens: <span style="color:var(--accent)">271, 089, 314, 452, 177</span> …</span>
+            <span style="color:var(--green)">SW = 1.00</span>
+            <span style="color:var(--text2)">HNSW = 0.83</span>
+            <span style="color:var(--green)">✓ relevant</span>
+          </div>
+        </div>
+      </div>
+      <!-- Rank 4 -->
+      <div style="display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border)">
+        <div style="min-width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;flex-shrink:0;background:var(--bg3);color:var(--text2);border:1px solid var(--border2)">4</div>
+        <div style="flex:1">
+          <div style="font-size:14px;color:var(--text);margin-bottom:5px">wander through the old town square <span style="font-size:11px;color:var(--text3);margin-left:6px">doc_012</span></div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px">
+            <span style="color:var(--text3)">Missing 089 (/ʌ/) — bigram (089→314) broken</span>
+            <span style="color:var(--amber)">SW = 0.86</span>
+            <span style="color:var(--text2)">HNSW = 0.64</span>
+            <span style="color:var(--red)">✗ distractor</span>
+          </div>
+        </div>
+      </div>
+      <!-- Rank 5 -->
+      <div style="display:flex;align-items:flex-start;gap:14px;padding:14px 18px">
+        <div style="min-width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:600;flex-shrink:0;background:var(--bg3);color:var(--text2);border:1px solid var(--border2)">5</div>
+        <div style="flex:1">
+          <div style="font-size:14px;color:var(--text);margin-bottom:5px">thunder rolled across the plain <span style="font-size:11px;color:var(--text3);margin-left:6px">doc_011</span></div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11.5px">
+            <span style="color:var(--text3)">Shares tokens 314 (/n/), 452 (/d/) only</span>
+            <span style="color:var(--text3)">SW = 0.44</span>
+            <span style="color:var(--text2)">HNSW = 0.31</span>
+            <span style="color:var(--red)">✗ irrelevant</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Summary metrics — this query</div>
+      <div class="bar-row"><div class="bar-label"><span>MAP</span><span>1.00</span></div><div class="bar-track"><div class="bar-fill bar-green" style="width:100%"></div></div></div>
+      <div class="bar-row"><div class="bar-label"><span>MRR</span><span>1.00</span></div><div class="bar-track"><div class="bar-fill bar-green" style="width:100%"></div></div></div>
+      <div class="bar-row"><div class="bar-label"><span>P@1</span><span>1.00</span></div><div class="bar-track"><div class="bar-fill bar-green" style="width:100%"></div></div></div>
+      <div class="bar-row"><div class="bar-label"><span>P@3</span><span>1.00</span></div><div class="bar-track"><div class="bar-fill bar-green" style="width:100%"></div></div></div>
+      <div class="insight" style="margin-top:10px">All 3 relevant documents retrieved in rank 1–3. The distractor "wander" (doc_012) correctly demoted to rank 4 — it lost points for the missing /ʌ/ (token 089) that unigram TF-IDF would not have caught.</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="goWonder(5)">← Back</button>
+      <button class="btn" onclick="goWonder(0)">↺ Restart</button>
+      <button class="btn primary" onclick="showTab(1)">Explore PMI theory →</button>
+    </div>
+  </div>
+</div><!-- /tab0 -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     PAGE 1 — PMI Bigram Discovery
+═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="tab1">
+  <div class="sec-title">PMI Bigram Discovery</div>
+  <div class="sec-sub">Pointwise Mutual Information measures how much more a token pair co-occurs than expected under independence. Only statistically surprising adjacent pairs enter the index.</div>
+
+  <div class="card">
+    <div class="card-title">The PMI Formula</div>
+    <div class="math">
+      PMI(a, b) = log &nbsp; p(a, b)<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;p(a) · p(b)<br><br>
+      <span class="comment">// p(a,b) = adjacent-pair corpus frequency</span><br>
+      <span class="comment">// PMI &gt; 0  →  co-occur more than chance  →  kept if &gt; τ</span><br>
+      <span class="comment">// PMI ≤ 0  →  accidental adjacency  →  discarded</span><br><br>
+      𝒷_τ = { (a,b) ∈ 𝒱² : PMI(a,b) &gt; τ }
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Why not frequency (BPE)?</div>
+      <p>BPE greedily merges the <em>most frequent</em> adjacent pairs. In a speech corpus these are widespread phonotactic transitions shared across many words — they carry <strong>near-zero IDF</strong> and contribute noise rather than discriminative signal.</p>
+      <div style="margin-top:12px">
+        <div class="bigram-pair fail">schwa <span class="sep">→</span> /t/ <small>freq-high, IDF≈0</small></div>
+        <div class="bigram-pair fail">/ə/ <span class="sep">→</span> /n/ <small>common across 1000s of words</small></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Why PMI works</div>
+      <p>PMI normalises by marginal frequencies. A bigram passes only when both tokens appear together <strong>significantly more than their individual rates predict</strong>, regardless of absolute frequency.</p>
+      <div style="margin-top:12px">
+        <div class="bigram-pair pass">/k/ <span class="sep">→</span> /æt/ <small>PMI=2.1, word-specific</small></div>
+        <div class="bigram-pair pass">/st/ <span class="sep">→</span> /ɹ/ <small>PMI=1.7, phoneme cluster</small></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Vocabulary compactness (K=1024, τ=0.5)</div>
+    <p style="margin-bottom:14px">PMI filtering reduces the candidate bigram space by <strong>three orders of magnitude</strong>:</p>
+    <div class="bar-row">
+      <div class="bar-label"><span>All possible bigrams (K²)</span><span>1,048,576</span></div>
+      <div class="bar-track"><div class="bar-fill bar-amber" style="width:100%"></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label"><span>PMI-selected 𝒷_τ</span><span>&lt; 1,400</span></div>
+      <div class="bar-track"><div class="bar-fill bar-green" style="width:0.13%"></div></div>
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-top:10px">The bigram bar is genuinely tiny — that's the point. Only the rarest, most informative token transitions survive.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Rare-event bias &amp; self-correction</div>
+    <p>Raw PMI can favour very rare bigrams. In PMI-QuEST this is <strong>self-correcting</strong>: constituents of rare bigrams are also rare, so their IDF weights are large. SW alignment is not misled. <code>τ=0.5</code> yields stable, degenerate-free bigram sets across all tokeniser configs; normalised PMI (NPMI) is a viable drop-in for richer corpora.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PAGE 2 — PMI vs BPE
+═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="tab2">
+  <div class="sec-title">PMI vs BPE Bigrams</div>
+  <div class="sec-sub">Controlled comparison on LibriSpeech test-clean (BEST-STD tokeniser, K=1024, τ=0.5, α=1.0, C=200). Both methods beat unigrams — but PMI leads on every metric.</div>
+
+  <div class="card">
+    <div class="card-title">Head-to-head comparison</div>
+    <div style="display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;margin-bottom:6px;font-family:var(--mono);font-size:11px;color:var(--text3)">
+      <div></div><div style="padding-left:8px">PMI (proposed)</div><div style="padding-left:8px">BPE</div>
+    </div>
+    <div class="compare-row">
+      <div class="metric-name">MAP</div>
+      <div class="compare-bar"><div class="compare-bar-fill cb-pmi" style="width:78.67%">0.7867</div></div>
+      <div class="compare-bar"><div class="compare-bar-fill cb-bpe" style="width:75.5%">0.7550</div></div>
+    </div>
+    <div class="compare-row">
+      <div class="metric-name">MRR</div>
+      <div class="compare-bar"><div class="compare-bar-fill cb-pmi" style="width:98.09%">0.9809</div></div>
+      <div class="compare-bar"><div class="compare-bar-fill cb-bpe" style="width:94.8%">0.9480</div></div>
+    </div>
+    <div class="compare-row">
+      <div class="metric-name">P@1</div>
+      <div class="compare-bar"><div class="compare-bar-fill cb-pmi" style="width:97.75%">0.9775</div></div>
+      <div class="compare-bar"><div class="compare-bar-fill cb-bpe" style="width:94.4%">0.9440</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:var(--text3)">
+    <div class="card-title">Baseline (H-QuEST, unigrams only)</div>
+    <div class="compare-row">
+      <div class="metric-name">MAP</div>
+      <div class="compare-bar"><div class="compare-bar-fill" style="width:67.6%;background:var(--text3)">0.6760</div></div>
+      <div></div>
+    </div>
+    <p style="margin-top:10px;font-size:13px;color:var(--text2)">Both augmentation strategies improve over unigrams — but the <strong>+0.032 MAP advantage</strong> of PMI over BPE is consistent and confirms that statistical significance of co-occurrence, not raw frequency, is the operative mechanism.</p>
+  </div>
+
+  <hr class="divider">
+  <div class="sec-title" style="font-size:18px">Why BPE underperforms</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">BPE's failure mode</div>
+      <p>BPE optimises for <strong>compression</strong>, not discrimination. It absorbs the most frequent token pairs — common phonotactic transitions (e.g. schwa + coronal stop) shared across thousands of words — into single merged tokens. These carry near-zero IDF and contribute noise rather than discriminative signal.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">PMI's mechanism</div>
+      <p>PMI identifies statistically surprising co-occurrences. These tend to correspond to <strong>word-specific or morpheme-specific phoneme clusters</strong> — exactly the signal needed for term detection. A bigram passes only when its joint probability exceeds the product of its marginals, irrespective of absolute frequency.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PAGE 3 — Results
+═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="tab3">
+  <div class="sec-title">Results on LibriSpeech test-clean</div>
+  <div class="sec-sub">Q=200 single-word queries, N=2,620 corpus utterances. All systems use SW scoring (m₊=+2, m₋=−1, g=−2). BEST-STD tokeniser at K=1024 for the baseline comparison.</div>
+
+  <div class="grid3" style="margin-bottom:20px">
+    <div class="card stat-block">
+      <div class="stat-num">0.7867</div>
+      <div class="stat-label">MAP</div>
+      <div class="stat-delta">+16.4% vs H-QuEST</div>
+    </div>
+    <div class="card stat-block">
+      <div class="stat-num">0.9809</div>
+      <div class="stat-label">MRR</div>
+      <div class="stat-delta">+13.8% vs H-QuEST</div>
+    </div>
+    <div class="card stat-block">
+      <div class="stat-num">0.9775</div>
+      <div class="stat-label">P@1</div>
+      <div class="stat-delta">Near-perfect rank-1 precision</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Baseline comparison (BEST-STD, K=1024)</div>
+    <div style="overflow-x:auto">
+    <table>
+      <tr><th>System</th><th>MAP</th><th>MRR</th><th>P@1</th><th>P@5</th><th>P@10</th></tr>
+      <tr><td style="text-align:left">DTW</td><td>0.4474</td><td>0.4790</td><td>0.4591</td><td>0.1036</td><td>0.0559</td></tr>
+      <tr><td style="text-align:left">TF-IDF</td><td>0.5974</td><td>0.5970</td><td>0.5891</td><td>0.1360</td><td>0.0734</td></tr>
+      <tr><td style="text-align:left">H-QuEST</td><td>0.6760</td><td>0.8621</td><td>0.8539</td><td>0.2215</td><td>0.1163</td></tr>
+      <tr><td style="text-align:left">BEST-STD retrieval</td><td>0.7383</td><td>0.8720</td><td>0.8586</td><td>0.2334</td><td>0.1260</td></tr>
+      <tr class="proposed"><td style="text-align:left"><strong>PMI-QuEST (ours)</strong></td><td class="hi">0.7867</td><td class="hi">0.9809</td><td class="hi">0.9775</td><td class="hi">0.2629</td><td class="hi">0.1427</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Cross-tokeniser results (PMI-QuEST)</div>
+    <div style="overflow-x:auto">
+    <table>
+      <tr><th>K</th><th>Model</th><th>Layer</th><th>MAP</th><th>MRR</th><th>P@1</th></tr>
+      <tr><td rowspan="4">256</td><td>HuBERT</td><td>L7</td><td>0.5624</td><td>0.6621</td><td>0.6320</td></tr>
+      <tr><td>Wav2Vec2</td><td>L6</td><td>0.4410</td><td>0.6035</td><td>0.5650</td></tr>
+      <tr><td>WavLM</td><td>L12</td><td>0.4728</td><td>0.5284</td><td>0.4900</td></tr>
+      <tr class="proposed"><td><strong>BEST-STD</strong></td><td>—</td><td class="best">0.6865</td><td class="best">0.7120</td><td class="best">0.7015</td></tr>
+      <tr><td rowspan="4">512</td><td>HuBERT</td><td>L7</td><td>0.5586</td><td>0.6685</td><td>0.6350</td></tr>
+      <tr><td>Wav2Vec2</td><td>L6</td><td>0.4521</td><td>0.6358</td><td>0.6050</td></tr>
+      <tr><td>WavLM</td><td>L12</td><td>0.5750</td><td>0.5950</td><td>0.5300</td></tr>
+      <tr class="proposed"><td><strong>BEST-STD</strong></td><td>—</td><td class="best">0.7155</td><td class="best">0.7309</td><td class="best">0.7255</td></tr>
+      <tr><td rowspan="4">1024</td><td>HuBERT</td><td>L9</td><td>0.6350</td><td>0.6700</td><td>0.5850</td></tr>
+      <tr><td>Wav2Vec2</td><td>L6</td><td>0.5850</td><td>0.6200</td><td>0.5620</td></tr>
+      <tr><td>WavLM</td><td>L9</td><td>0.6850</td><td>0.7050</td><td>0.6900</td></tr>
+      <tr class="proposed"><td><strong>BEST-STD</strong></td><td>—</td><td class="hi">0.7867</td><td class="hi">0.9809</td><td class="hi">0.9775</td></tr>
+    </table>
+    </div>
+    <p style="margin-top:12px;font-size:13px;color:var(--text2)">BEST-STD dominates at every vocabulary size. Its qualitative jump at K=1024 (MRR: 0.73 → 0.98) reflects codebooks fine-grained enough for each phoneme sequence to map to a near-unique token subsequence.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Ablation — component contributions (BEST-STD, K=1024)</div>
+    <p style="margin-bottom:12px">The +0.111 MAP gain from adding PMI bigrams (H-QuEST → PMI-QuEST) is the single largest step. SW reranking is the most impactful component: without it, MAP is modest even with PMI bigrams.</p>
+    <div class="bar-row"><div class="bar-label"><span>TF-IDF (unigrams only)</span><span>0.597</span></div><div class="bar-track"><div class="bar-fill bar-amber" style="width:59.7%"></div></div></div>
+    <div class="bar-row"><div class="bar-label"><span>+ HNSW (no SW)</span><span>~0.640</span></div><div class="bar-track"><div class="bar-fill bar-amber" style="width:64%"></div></div></div>
+    <div class="bar-row"><div class="bar-label"><span>H-QuEST (HNSW + SW, unigrams)</span><span>0.676</span></div><div class="bar-track"><div class="bar-fill bar-amber" style="width:67.6%"></div></div></div>
+    <div class="bar-row"><div class="bar-label"><span>PMI-QuEST, HNSW only (no SW)</span><span>~0.720</span></div><div class="bar-track"><div class="bar-fill bar-blue" style="width:72%"></div></div></div>
+    <div class="bar-row"><div class="bar-label"><span>PMI-QuEST (full)</span><span>0.787</span></div><div class="bar-track"><div class="bar-fill bar-green" style="width:78.7%"></div></div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PAGE 4 — Cross-Lingual
+═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="tab4">
+  <div class="sec-title">Zero-Shot Cross-Lingual Generalisation</div>
+  <div class="sec-sub">IndicSUPERB Kathbath benchmark — 12 typologically diverse Indic languages, Q=40 queries per language. XLS-R-300M encoder, layer 7, K=1024. No language-specific adaptation. All 12 gains are statistically significant (paired Wilcoxon, p&lt;0.05).</div>
+
+  <div class="lang-grid">
+    <div class="lang-card">
+      <div class="lang-family">Indo-Aryan</div>
+      <div class="lang-name">Bengali</div>
+      <div class="lang-map">0.719</div>
+      <div class="lang-gain">+0.079 vs H-QuEST ✓</div>
+    </div>
+    <div class="lang-card">
+      <div class="lang-family">Indo-Aryan</div>
+      <div class="lang-name">Gujarati</div>
+      <div class="lang-map">0.754</div>
+      <div class="lang-gain">+0.119 vs H-QuEST ✓</div>
+    </div>
+    <div class="lang-card">
+      <div class="lang-family">Indo-Aryan</div>
+      <div class="lang-name">Hindi</div>
+      <div class="lang-map">0.755</div>
+      <div class="lang-gain">+0.117 vs H-QuEST ✓</div>
+    </div>
+    <div class="lang-card">
+      <div class="lang-family">Indo-Aryan</div>
+      <div class="lang-name">Marathi</div>
+      <div class="lang-map">0.760</div>
+      <div class="lang-gain">+0.123 vs H-QuEST ✓</div>
+    </div>
+    <div class="lang-card">
+      <div class="lang-family">Indo-Aryan</div>
+      <div class="lang-name">Odia</div>
+      <div class="lang-map">0.748</div>
+      <div class="lang-gain">+0.118 vs H-QuEST ✓</div>
+    </div>
+    <div class="lang-card">
+      <div class="lang-family">Indo-Aryan</div>
+      <div class="lang-name">Punjabi</div>
+      <div class="lang-map">0.697</div>
+      <div class="lang-gain">+0.056 vs H-QuEST ✓</div>
+    </div>
+    <div class="lang-card">
+      <div class="lang-family">Classical</div>
+      <div class="lang-name">Sanskrit</div>
+      <div class="lang-map">0.760</div>
+      <div class="lang-gain">+0.118 vs H-QuEST ✓</div>
+    </div>
+    <div class="lang-card">
+      <div class="lang-family">Indo-Aryan</div>
+      <div class="lang-name">Urdu</div>
+      <div class="lang-map">0.770</div>
+      <div class="lang-gain">+0.131 vs H-QuEST ✓</div>
+    </div>
+    <div class="lang-card" style="border-color:var(--accent2)">
+      <div class="lang-family" style="color:var(--accent2)">Dravidian</div>
+      <div class="lang-name">Kannada</div>
+      <div class="lang-map">0.763</div>
+      <div class="lang-gain">+0.126 vs H-QuEST ✓</div>
+    </div>
+    <div class="lang-card" style="border-color:var(--accent2)">
+      <div class="lang-family" style="color:var(--accent2)">Dravidian</div>
+      <div class="lang-name">Malayalam</div>
+      <div class="lang-map">0.747</div>
+      <div class="lang-gain">+0.117 vs H-QuEST ✓</div>
+    </div>
+    <div class="lang-card" style="border-color:var(--accent2)">
+      <div class="lang-family" style="color:var(--accent2)">Dravidian</div>
+      <div class="lang-name">Tamil</div>
+      <div class="lang-map">0.750</div>
+      <div class="lang-gain">+0.114 vs H-QuEST ✓</div>
+    </div>
+    <div class="lang-card" style="border-color:var(--accent2)">
+      <div class="lang-family" style="color:var(--accent2)">Dravidian</div>
+      <div class="lang-name">Telugu</div>
+      <div class="lang-map">0.749</div>
+      <div class="lang-gain">+0.117 vs H-QuEST ✓</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <div class="card-title">Why it generalises</div>
+    <p>PMI bigram selection is entirely data-driven and language-agnostic: statistics are estimated independently from each target-language corpus, requiring no cross-lingual transfer of the bigram vocabulary. XLS-R-300M (pretrained on 128 languages) provides phonemic coverage; PMI then captures language-specific token collocations that distinguish word identities. Punjabi shows the smallest gain (+0.056), attributed to its close phonological similarity to Hindi, which increases within-corpus ambiguity.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PAGE 5 — Algorithm
+═══════════════════════════════════════════════════════════════ -->
+<div class="page" id="tab5">
+  <div class="sec-title">PMI-QuEST Algorithm</div>
+  <div class="sec-sub">Two-phase retrieve-then-rerank pipeline. The offline phase runs once per corpus. The online phase runs per query in O(log N + C·m·n̄) time.</div>
+
+  <div class="algo">
+    <div><span class="kw">ALGORITHM</span> PMI-QuEST</div>
+    <div><span class="kw">INPUT:</span>  Corpus 𝒟, encoder f_ℓ, centroids {μ_c}, threshold τ, weight α, C, SW params (m₊, m₋, g)</div>
+    <div><span class="kw">OUTPUT:</span> Ranked list for query x_q</div>
+    <br>
+    <div><span class="cmt">// ── OFFLINE: executed once per corpus ──────────────────────</span></div>
+    <div><span class="kw">FOR</span> each x_d ∈ 𝒟:</div>
+    <div class="indent1">s_d ← <span class="fn">TOKENISE</span>(x_d, f_ℓ, {μ_c})</div>
+    <br>
+    <div>Estimate p(t) and p(a,b) from corpus adjacent-pair counts</div>
+    <div>𝒷_τ ← { (a,b) : PMI(a,b) &gt; τ }  <span class="cmt">// filter bigrams</span></div>
+    <div>Compute IDF(t) for all t ∈ 𝒱 ; IDF(a,b) for all (a,b) ∈ 𝒷_τ</div>
+    <br>
+    <div><span class="kw">FOR</span> each x_d ∈ 𝒟:</div>
+    <div class="indent1">v_d ← [ u_d ‖ α·b_d ] / ‖·‖₂  <span class="cmt">// PMI-TF-IDF vector</span></div>
+    <br>
+    <div>Build HNSW index ℋ over {v_d}  <span class="cmt">// M=16, ef_construction=150</span></div>
+    <br>
+    <div><span class="cmt">// ── ONLINE: executed per query ─────────────────────────────</span></div>
+    <div>s_q ← <span class="fn">TOKENISE</span>(x_q, f_ℓ, {μ_c})</div>
+    <div>v_q ← [ u_q ‖ α·b_q ] / ‖·‖₂</div>
+    <div>𝒞  ← ℋ.<span class="fn">SEARCH</span>(v_q, C)  <span class="cmt">// ef_search=200, C=200</span></div>
+    <br>
+    <div><span class="kw">FOR</span> each d ∈ 𝒞:</div>
+    <div class="indent1">H(i,j) = max(0, H(i-1,j-1)+σ(t_i^q, t_j^d), H(i-1,j)+g, H(i,j-1)+g)</div>
+    <div class="indent1">SW(q,d) ← max_{i,j} H(i,j) / m</div>
+    <br>
+    <div><span class="kw">RETURN</span> 𝒞 sorted by SW(q,d) descending</div>
+  </div>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <div class="card-title">Complexity</div>
+      <div class="math">
+        Offline: O(N·L) tokenisation + O(N) vector build<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ O(N log N) HNSW construction<br><br>
+        Online:  O(log N) HNSW search<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ O(C·m·n̄) SW reranking<br><br>
+        <span class="comment">// vs DTW: O(N·m·L) — no pre-filter</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Hyperparameters</div>
+      <table>
+        <tr><th>Param</th><th>Value</th><th>Notes</th></tr>
+        <tr><td>τ (PMI threshold)</td><td>0.5</td><td style="text-align:left;font-size:12px">Stable plateau τ∈[0,2]</td></tr>
+        <tr><td>α (bigram weight)</td><td>1.0</td><td style="text-align:left;font-size:12px">Saturates at α≥1.0</td></tr>
+        <tr><td>C (candidates)</td><td>200</td><td style="text-align:left;font-size:12px">MAP grows up to C=200</td></tr>
+        <tr><td>m₊ / m₋ / g</td><td>+2/−1/−2</td><td style="text-align:left;font-size:12px">SW match/mismatch/gap</td></tr>
+        <tr><td>M (HNSW)</td><td>16</td><td style="text-align:left;font-size:12px">ef_construction=150</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="footnote">
+    Paper: <strong>PMI-QuEST: PMI-Guided Robust Query-by-Example Spoken Term Detection</strong> · IEEE TASLP (under review) ·
+    <a href="https://github.com/Akankss/PMI-QuEST-PMI-Guided-Robust-Query-by-Example-Spoken-Term-Detection" target="_blank">github.com/Akankss/PMI-QuEST-…</a>
+    <br>Authors: Akanksha Singh · Vipul Arora (IIT Kanpur / KU Leuven) · Yi-Ping Phoebe Chen (La Trobe University)
+  </div>
+</div>
+
+<script>
+// ── Tab switching ─────────────────────────────────────────────
+function showTab(i) {
+  document.querySelectorAll('.page').forEach((p, j) => p.classList.toggle('active', j === i));
+  document.querySelectorAll('.tab-btn').forEach((b, j) => b.classList.toggle('active', j === i));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Wonder walkthrough step navigation ───────────────────────
+const WONDER_STEPS = 7;
+function goWonder(i) {
+  // Show/hide panels
+  document.querySelectorAll('[id^="w"]').forEach((p, j) => {
+    p.classList.toggle('active', j === i);
+  });
+  // Update pill states
+  document.querySelectorAll('#wonder-pills .step-btn').forEach((b, j) => {
+    b.classList.remove('active', 'done');
+    if (j === i) b.classList.add('active');
+    else if (j < i) b.classList.add('done');
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
