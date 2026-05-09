@@ -4,9 +4,8 @@
 
 ---
 
-## 🎯 Interactive Demo
-
-**Open `demo/pmiquest_demo.html` in any browser** 
+## 🔴 Live Demo
+   👉 [**Interactive pipeline demo**](https://akankss.github.io/PMI-QuEST-PMI-Guided-Robust-Query-by-Example-Spoken-Term-Detection/)
 
 The demo walks through the full pipeline:
 
