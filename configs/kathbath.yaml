@@ -1,0 +1,46 @@
+# configs/kathbath.yaml
+# ─────────────────────────────────────────────────────────────────
+# Configuration for IndicSUPERB QbE multilingual evaluation
+# (Kathbath / qbe_indicsuperb dataset).
+# ─────────────────────────────────────────────────────────────────
+
+dataset: kathbath
+split: eval    # eval (40 queries + rttm gt) | dev (10 queries, no gt)
+
+# ── Data paths ────────────────────────────────────────────────────
+data_dir:  data/qbe_indicsuperb
+out_dir:   data/kathbath_ready
+manifest:  data/kathbath_ready/manifest_eval.json
+
+# ── Languages ─────────────────────────────────────────────────────
+languages:
+  - bengali
+  - gujarati
+  - hindi
+  - kannada
+  - malayalam
+  - marathi
+  - odia
+  - punjabi
+  - sanskrit
+  - tamil
+  - telugu
+  - urdu
+
+# ── Tokeniser (multilingual) ──────────────────────────────────────
+tokeniser:
+  model:      xlsr-300m    # facebook/wav2vec2-xls-r-300m
+  layer:      7
+  n_clusters: 1024
+  out_dir:    data/kathbath_ready
+
+# ── PMI-QuEST (same as LibriSpeech proposed) ─────────────────────
+pmiquest:
+  pmi_tau:       0.5
+  bigram_weight: 1.0
+  hnsw_k:        200
+  use_pmi_bigrams: true
+  use_pmitd:       false
+
+# ── Results ───────────────────────────────────────────────────────
+results_dir: results/kathbath
