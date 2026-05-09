@@ -679,7 +679,7 @@ if __name__ == "__main__":
         _write_csv(query_rows, str(out_dir / "queries.csv"))
         _print_stats(query_rows, "queries")
 
-        print(f"\n✅  Done → {out_dir}/")
+        print(f"\n  Done → {out_dir}/")
         print(f"\nNext step:")
         print(f"  python run_pmiquest_comparison.py \\")
         print(f"      --corpus    {out_dir}/corpus.csv \\")
