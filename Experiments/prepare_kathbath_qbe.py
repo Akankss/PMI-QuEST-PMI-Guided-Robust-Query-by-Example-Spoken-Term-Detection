@@ -197,4 +197,3 @@ if __name__ == "__main__":
     print(f"  python run_kathbath_pmiquest.py \\")
     print(f"      --manifest {manifest_path} \\")
     print(f"      --out_dir  kathbath_results/")
-
