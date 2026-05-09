@@ -1,0 +1,40 @@
+# configs/librispeech.yaml
+# ─────────────────────────────────────────────────────────────────
+# Default configuration for LibriSpeech test-clean experiments.
+# All paths are relative to the repository root.
+# ─────────────────────────────────────────────────────────────────
+
+dataset: librispeech
+split: test-clean
+
+# ── Audio directories ─────────────────────────────────────────────
+corpus_dir:  data/librispeech/corpus_audio
+query_dir:   data/librispeech/query_audio
+relevance:   data/librispeech/metadata/relevance.json
+
+# ── Tokeniser defaults ────────────────────────────────────────────
+tokeniser:
+  model:      wavlm-large
+  layer:      6
+  n_clusters: 1024
+  out_dir:    data/librispeech/wavlm_large_l6_k1024
+
+# ── PMI-QuEST hyperparameters (proposed config) ───────────────────
+pmiquest:
+  pmi_tau:       0.5    # PMI threshold τ  (Group B)
+  bigram_weight: 1.0    # Bigram weight α  (Group C)
+  hnsw_k:        200    # HNSW candidates C (Group D)
+  use_pmi_bigrams: true
+  use_pmitd:       false
+
+# ── Smith-Waterman alignment ──────────────────────────────────────
+smith_waterman:
+  match:    2.0
+  mismatch: -1.0
+  gap:      -2.0
+
+# ── HNSW index parameters ─────────────────────────────────────────
+hnsw:
+  M:               16
+  ef_construction: 150
+  ef_search:       200
