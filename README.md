@@ -7,16 +7,6 @@
 ## 🔴 Live Demo
    👉 [**Interactive pipeline demo**](https://akankss.github.io/PMI-QuEST-PMI-Guided-Robust-Query-by-Example-Spoken-Term-Detection/)
 
-The demo walks through the full pipeline:
-
-| Tab | Content |
-|-----|---------|
-| ① Pipeline Walkthrough | Step-by-step trace of a single query through tokenise → PMI-TF-IDF vector → HNSW search → SW reranking |
-| ② PMI Bigram Discovery | The PMI formula, why frequency (BPE) fails, vocabulary compactness |
-| ③ PMI vs BPE | Side-by-side MAP/MRR/P@1 comparison |
-| ④ Results | Full baseline table + cross-tokeniser results + ablation bars |
-| ⑤ Cross-Lingual | All 12 IndicSUPERB Kathbath languages, per-language MAP |
-| ⑥ Algorithm | Pseudocode + complexity + hyperparameter table |
 
 ---
 
