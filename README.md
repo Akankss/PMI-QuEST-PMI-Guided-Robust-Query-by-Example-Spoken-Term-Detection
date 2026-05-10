@@ -22,6 +22,8 @@ QbE-STD locates spoken queries in untranscribed audio without ASR. We propose **
 
 ## 🏗️ Pipeline
 
+
+![PMI-QuEST end-to-end pipeline](Figures/arch.png)
 ```
 Speech corpus / query
        │
