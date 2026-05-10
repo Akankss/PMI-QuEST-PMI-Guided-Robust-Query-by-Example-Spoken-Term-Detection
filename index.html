@@ -436,7 +436,7 @@ code {
 ═══════════════════════════════════════════════════════════════ -->
 <div class="page active" id="tab0">
   <div class="sec-title">Step-by-Step Pipeline</div>
-  <div class="sec-sub">Trace the spoken query <code>"wonder"</code> through the full PMI-QuEST pipeline: query &amp; corpus setup → tokenisation → PMI bigram selection → vector building → HNSW retrieval → Smith-Waterman reranking → final results. The phonetically similar distractor <em>"wander"</em> is used to show where weaker systems fail.</div>
+  <div class="sec-sub">Trace the spoken query <code>"wonder"</code> through the full PMI-QuEST pipeline: query &amp; corpus setup → Tokenisation → PMI bigram selection → Augmented Vectors → HNSW retrieval → Smith-Waterman Re-ranking → Final Results. The phonetically similar distractor <em>"wander"</em> is used to show where weaker systems fail.</div>
 
   <!-- Step pills -->
   <div class="step-nav" id="wonder-pills">
@@ -453,7 +453,7 @@ code {
   <div class="panel active" id="w0">
     <div class="card">
       <div class="card-title">Step 01 of 07 — The query and the corpus</div>
-      <p>We want to find every utterance in a LibriSpeech-style corpus that contains the spoken word <strong style="color:var(--text)">"wonder"</strong>. The corpus has 12 utterances; 3 are relevant (contain "wonder").</p>
+      <p>We want to find every utterance in a LibriSpeech corpus that contains the spoken word <strong style="color:var(--text)">"wonder"</strong>. The corpus has 12 utterances; 3 are relevant (contain "wonder").</p>
     </div>
 
     <div class="card">
@@ -463,7 +463,7 @@ code {
         <span style="font-size:18px;font-weight:600;color:var(--accent);font-family:var(--mono)">"wonder"</span>
         <span class="tok word">→ raw audio waveform → SSL encoder → k-means</span>
       </div>
-      <p>A 0.8-second clip. The WavLM-base layer-7 encoder will turn this into a token sequence in the next step.</p>
+      <p>A 0.8-second clip. The SSL encoder will turn this into a token sequence. </p>
     </div>
 
     <div class="card">
@@ -531,18 +531,18 @@ code {
   <div class="panel" id="w1">
     <div class="card">
       <div class="card-title">Step 02 of 07 — Tokenise the query</div>
-      <p>WavLM-base layer 7 extracts frame embeddings at 50 Hz. Each frame is assigned to its nearest k-means centroid (K = 512). Consecutive duplicate tokens are collapsed to give a compact token sequence.</p>
+      <p> SSL encoder extracts frame embeddings at 50 Hz. Each frame is assigned to its nearest k-means centroid (K = 1024). Consecutive duplicate tokens are collapsed to give a compact token sequence.</p>
     </div>
 
     <div class="pipeline-flow">
       <span class="pf-step active">SSL encoder</span><span class="pf-arr">→</span>
-      <span class="pf-step">k-means (K=512)</span><span class="pf-arr">→</span>
+      <span class="pf-step">k-means (K=1024)</span><span class="pf-arr">→</span>
       <span class="pf-step">dedup</span><span class="pf-arr">→</span>
       <span class="pf-step">s_q</span>
     </div>
 
     <div class="card">
-      <div class="card-title">Frame-level centroid assignments (50 Hz, ~40 frames for "wonder")</div>
+      <div class="card-title">Frame-level centroid assignments </div>
       <div class="math">
         t_i = argmin<sub>c∈𝒱</sub> ‖h_i − μ_c‖₂<br><br>
         Frames 0–6  : centroid <b style="color:var(--accent)">271</b>&nbsp; <span class="comment">// onset /w/</span><br>
@@ -631,7 +631,7 @@ code {
     </div>
   </div>
 
-  <!-- ── WONDER STEP 3: Build Vector ───────────────────── -->
+  <!-- ── WONDER STEP 3: Build Augmented Vector ───────────────────── -->
   <div class="panel" id="w3">
     <div class="card">
       <div class="card-title">Step 04 of 07 — Build the PMI-TF-IDF vector</div>
@@ -661,7 +661,7 @@ code {
     </div>
 
     <div class="card">
-      <div class="card-title">Combined vector (unigrams ‖ bigrams → L2-normalise)</div>
+      <div class="card-title">Augmented vector (unigrams ‖ bigrams → L2-normalise)</div>
       <div class="math">
         raw = [0.46, 0.68, 0.56, 0.42, 0.62 | 0.85, 0.70, 0.78]<br>
         ‖raw‖ = √(0.21+0.46+0.31+0.18+0.38+0.72+0.49+0.61) = √3.36 ≈ 1.83<br><br>
@@ -707,10 +707,10 @@ code {
     </div>
   </div>
 
-  <!-- ── WONDER STEP 5: SW Reranking ────────────────────── -->
+  <!-- ── WONDER STEP 5: SW Re-ranking ────────────────────── -->
   <div class="panel" id="w5">
     <div class="card">
-      <div class="card-title">Step 06 of 07 — Smith-Waterman reranking</div>
+      <div class="card-title">Step 06 of 07 — Smith-Waterman Re-ranking</div>
       <p>SW local alignment enforces full token-sequence order. Applied to the top-8 HNSW candidates. Score = max H(i,j) / m where m = max(|s_q|, |s_d|). Parameters: match +2, mismatch −1, gap −2.</p>
       <div class="math">H(i,j) = max( 0, &nbsp; H(i-1,j-1) + σ(t_i^q, t_j^d), &nbsp; H(i-1,j)−2, &nbsp; H(i,j-1)−2 )<br>
 σ(a,b) = +2 if a=b, else −1</div>
@@ -869,7 +869,7 @@ code {
   <div class="grid2">
     <div class="card">
       <div class="card-title">Why not frequency (BPE)?</div>
-      <p>BPE greedily merges the <em>most frequent</em> adjacent pairs. In a speech corpus these are widespread phonotactic transitions shared across many words — they carry <strong>near-zero IDF</strong> and contribute noise rather than discriminative signal.</p>
+      <p>BPE greedily merges the <em>most frequent</em> adjacent pairs. In a speech corpus these are widespread phonotactic transitions shared across many words they carry <strong>near-zero IDF</strong> and contribute noise rather than discriminative signal.</p>
       <div style="margin-top:12px">
         <div class="bigram-pair fail">schwa <span class="sep">→</span> /t/ <small>freq-high, IDF≈0</small></div>
         <div class="bigram-pair fail">/ə/ <span class="sep">→</span> /n/ <small>common across 1000s of words</small></div>
@@ -896,7 +896,7 @@ code {
       <div class="bar-label"><span>PMI-selected 𝒷_τ</span><span>&lt; 1,400</span></div>
       <div class="bar-track"><div class="bar-fill bar-green" style="width:0.13%"></div></div>
     </div>
-    <p style="font-size:13px;color:var(--text2);margin-top:10px">The bigram bar is genuinely tiny — that's the point. Only the rarest, most informative token transitions survive.</p>
+    <p style="font-size:13px;color:var(--text2);margin-top:10px">The bigram bar is genuinely tiny that's the point. Only the rarest, most informative token transitions survive.</p>
   </div>
 
   <div class="card">
@@ -910,7 +910,7 @@ code {
 ═══════════════════════════════════════════════════════════════ -->
 <div class="page" id="tab2">
   <div class="sec-title">PMI vs BPE Bigrams</div>
-  <div class="sec-sub">Controlled comparison on LibriSpeech test-clean (BEST-STD tokeniser, K=1024, τ=0.5, α=1.0, C=200). Both methods beat unigrams — but PMI leads on every metric.</div>
+  <div class="sec-sub">Controlled comparison on LibriSpeech test-clean (BEST-STD tokeniser, K=1024, τ=0.5, α=1.0, C=200). Both methods beat unigrams, but PMI leads on every metric.</div>
 
   <div class="card">
     <div class="card-title">Head-to-head comparison</div>
@@ -941,7 +941,7 @@ code {
       <div class="compare-bar"><div class="compare-bar-fill" style="width:67.6%;background:var(--text3)">0.6760</div></div>
       <div></div>
     </div>
-    <p style="margin-top:10px;font-size:13px;color:var(--text2)">Both augmentation strategies improve over unigrams — but the <strong>+0.032 MAP advantage</strong> of PMI over BPE is consistent and confirms that statistical significance of co-occurrence, not raw frequency, is the operative mechanism.</p>
+    <p style="margin-top:10px;font-size:13px;color:var(--text2)">Both augmentation strategies improve over unigrams, but the <strong>+0.032 MAP advantage</strong> of PMI over BPE is consistent and confirms that statistical significance of co-occurrence, not raw frequency, is the operative mechanism.</p>
   </div>
 
   <hr class="divider">
@@ -949,7 +949,7 @@ code {
   <div class="grid2">
     <div class="card">
       <div class="card-title">BPE's failure mode</div>
-      <p>BPE optimises for <strong>compression</strong>, not discrimination. It absorbs the most frequent token pairs — common phonotactic transitions (e.g. schwa + coronal stop) shared across thousands of words — into single merged tokens. These carry near-zero IDF and contribute noise rather than discriminative signal.</p>
+      <p>BPE optimises for <strong>compression</strong>, not discrimination. It absorbs the most frequent token pairs common phonotactic transitions (e.g. schwa + coronal stop) shared across thousands of words into single merged tokens. These carry near-zero IDF and contribute noise rather than discriminative signal.</p>
     </div>
     <div class="card">
       <div class="card-title">PMI's mechanism</div>
