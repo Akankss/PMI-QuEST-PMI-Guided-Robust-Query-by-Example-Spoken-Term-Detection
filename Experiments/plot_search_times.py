@@ -24,19 +24,12 @@ import numpy as np
 # Data
 # ---------------------------------------------------------------------------
 
-'''FALLBACK = {
-    "TF-IDF":    0.1,
-    "BEST-STD":  2019.0,
-    "H-QuEST":   3172.2,
-    "PMI-QuEST": 3251.9,
-    "Token-DTW": 5219.4,
-}'''
 
 FALLBACK = {
     "TF-IDF":    0.38,
-    "BEST-STD":  28.61,
-    "H-QuEST":   29.55,
-    "PMI-QuEST": 26.63,
+    "BEST-STD":  18.61,
+    "H-QuEST":   54.56,
+    "PMI-QuEST": 56.47,
     "Token-DTW": 75.03,
 }
 SYSTEM_ORDER = ["TF-IDF", "BEST-STD",  "H-QuEST", "PMI-QuEST", "Token-DTW"]
