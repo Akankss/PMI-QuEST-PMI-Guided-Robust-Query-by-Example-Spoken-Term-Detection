@@ -2,13 +2,13 @@
 
 > **IEEE TASLP** (under review) · Akanksha Singh ( IIT Kanpur and La Trobe University) · Yi-Ping Phoebe Chen (La Trobe University) · Vipul Arora (IIT Kanpur / KU Leuven)
 
----
+
 
 ## 🔴 Live Demo
    👉 [**Interactive pipeline demo**](https://akankss.github.io/PMI-QuEST-PMI-Guided-Robust-Query-by-Example-Spoken-Term-Detection/)
 
 
----
+
 
 ## 📋 Abstract
 
@@ -18,7 +18,7 @@ QbE-STD locates spoken queries in untranscribed audio without ASR. We propose **
 - **+16.4% relative MAP** over H-QuEST; **+6.6%** over standalone BEST-STD retrieval
 - **Zero-shot cross-lingual**: Statistically significant gains on all 12 IndicSUPERB Kathbath languages (paired Wilcoxon, p < 0.05)
 
----
+
 
 ## 🏗️ Pipeline
 
@@ -41,7 +41,7 @@ HNSW index (offline) → top-C candidates   O(log N)
 Smith-Waterman reranking → ranked list     O(C·m·n̄)
 ```
 
----
+
 ## Repository Structure
 
 ```
@@ -75,7 +75,6 @@ PMI-QuEST/
 └── LICENSE
 ```
 
---
 
 ## Results
 
@@ -120,7 +119,6 @@ PMI-QuEST achieves **+16.4% relative MAP** over H-QuEST and **+6.6%** over stand
 | SW: m₊ / m₋ / g | +2 / −1 / −2 | Match / mismatch / gap |
 | HNSW M | 16 | ef_construction = 150, ef_search = 200 |
 
----
 
 ## Installation
 
@@ -140,7 +138,7 @@ For GPU-accelerated tokenisation (optional, needed only for `audio_tokenizer_v2.
 pip install torch torchaudio transformers  # follow pytorch.org for CUDA version
 ```
 
----
+
 
 ## Quick Start
 
@@ -195,7 +193,6 @@ python Experiments/run_ablation.py \
     --groups    ABCDE
 ```
 
----
 
 ## Data Format
 
@@ -223,7 +220,6 @@ filename,tokens
 }
 ```
 
----
 
 
 ## Citation
