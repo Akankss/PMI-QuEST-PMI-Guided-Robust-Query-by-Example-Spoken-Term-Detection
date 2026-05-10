@@ -53,7 +53,7 @@ import numpy as np
 # ── import tokeniser ──────────────────────────────────────────────────────────
 sys.path.insert(0, str(Path(__file__).parent))
 try:
-    from audio_tokenizer import KMeansTokenizer, load_audio, _write_csv
+    from audio_tokenizer_v2 import KMeansTokenizer, load_audio, _write_csv
 except ImportError:
     raise ImportError(
         "audio_tokenizer_v2.py not found. "
