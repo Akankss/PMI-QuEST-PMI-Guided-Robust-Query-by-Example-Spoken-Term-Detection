@@ -1,8 +1,6 @@
 """
 pmiquest_system.py
-==================
-Self-contained implementation of three QbE-STD systems for TASLP comparison,
-corrected to match the paper exactly.
+
 
 Systems
 -------
@@ -20,20 +18,11 @@ Systems
                  → HNSW (same hyperparams)
                  → Smith-Waterman rerank (same, score/query_length)
 
-Fixes applied vs the previous version
---------------------------------------
-[1] HNSWIndex now uses hnswlib (real HNSW graph) with M=16,
-    ef_construction=150, ef_search=200.  Falls back to sklearn
-    NearestNeighbors with a loud warning if hnswlib is not installed.
-[2] smith_waterman() returns max(H) / len(query)  (paper Eq. 4).
-[3] Default candidate count changed to C=200 everywhere.
-[4] Default bigram weight α=1.0 (paper §3.4).
-[5] PMITokenDedup, regime-gated SW, and PMI-soft SW removed —
-    none of these appear in the paper.
+
 
 Evaluation
 ----------
-MAP, MRR, P@1, P@5, P@10 — computed over the full ranked corpus.
+MAP, MRR, P@1, P@5, P@10 
 
 Usage
 -----
@@ -51,7 +40,7 @@ import numpy as np
 from collections import Counter, defaultdict
 from typing import List, Dict, Tuple, Optional, Set
 
-# ── Optional hnswlib import (required for paper-accurate results) ─────────────
+
 try:
     import hnswlib as _hnswlib
     _HNSWLIB_AVAILABLE = True
@@ -137,9 +126,6 @@ class HNSWIndex:
     """
     HNSW approximate nearest-neighbour index.
 
-    Uses hnswlib when available (paper-accurate, M=16, ef_construction=150,
-    ef_search=200).  Falls back to sklearn BallTree with a warning if hnswlib
-    is not installed.
 
     Parameters
     ----------
@@ -161,15 +147,10 @@ class HNSWIndex:
         self.ef_search       = ef_search
         self.n_neighbors     = n_neighbors
         self._index          = None
-        self._matrix         = None   # kept for fallback cosine similarity
+        self._matrix         = None   
 
     def fit(self, matrix: np.ndarray) -> "HNSWIndex":
-        """
-        Build the index from L2-normalised document vectors.
-
-        matrix : shape (N, D), rows must be L2-normalised.
-        For L2-normalised vectors, cosine distance == 1 - inner product.
-        """
+       
         self._matrix = matrix.astype(np.float32)
         N, D = matrix.shape
 
@@ -512,8 +493,6 @@ def evaluate(
 ) -> Dict[str, float]:
     """
     Compute MAP, MRR, P@1, P@5, P@10.
-
-    ranked_lists[q] must contain ALL corpus indices for MAP to be correct.
     """
     maps = [_ap(rl, gt) for rl, gt in zip(ranked_lists, ground_truth)]
 
@@ -538,9 +517,8 @@ def evaluate(
 
 class TFIDFBaseline:
     """
-    Exact reproduction of Singh et al. (2024) TF-IDF QbE-STD.
 
-    Unigram TF-IDF + brute-force cosine similarity. No HNSW, no SW.
+    Unigram TF-IDF + brute-force cosine similarity. 
     """
 
     def __init__(self):
@@ -571,7 +549,6 @@ class TFIDFBaseline:
 
 class HQuEST:
     """
-    Faithful reproduction of H-QuEST (Singh et al., Interspeech 2025).
 
     Pipeline
     --------
@@ -580,7 +557,6 @@ class HQuEST:
         -> HNSW (M=16, ef_construction=150, ef_search=200, C=200)
         -> Top-C candidates by cosine distance
         -> Smith-Waterman reranking, score normalised by query length
-        -> Remaining docs appended by cosine similarity
 
     Parameters
     ----------
@@ -841,42 +817,3 @@ def run_comparison(
         print("=" * 70)
 
     return results
-
-
-# =============================================================================
-# ── Section 11: Quick self-test with synthetic data  ─────────────────────────
-# =============================================================================
-
-if __name__ == "__main__":
-    import random
-
-    rng = random.Random(42)
-    print("PMI-QuEST self-test -- synthetic data")
-    print("Replace with real LibriSpeech token sequences for paper results.\n")
-
-    V = 100   # vocab size
-    N = 200   # corpus size
-    Q = 20    # queries
-
-    # Synthetic corpus: random token sequences, length 50-300
-    corpus_seqs = [
-        [rng.randint(0, V - 1) for _ in range(rng.randint(50, 300))]
-        for _ in range(N)
-    ]
-
-    # Short queries (~12 tokens), relevant = docs where we plant the pattern
-    query_seqs:   List[List[int]] = []
-    ground_truth: List[Set[int]]  = []
-
-    for _ in range(Q):
-        pattern      = [rng.randint(0, V - 1) for _ in range(12)]
-        relevant_set = set(rng.sample(range(N), k=rng.randint(3, 8)))
-        for idx in relevant_set:
-            pos = rng.randint(0, max(0, len(corpus_seqs[idx]) - 12))
-            corpus_seqs[idx] = (
-                corpus_seqs[idx][:pos] + pattern + corpus_seqs[idx][pos + 12:]
-            )
-        query_seqs.append(pattern)
-        ground_truth.append(relevant_set)
-
-    run_comparison(corpus_seqs, query_seqs, ground_truth)
