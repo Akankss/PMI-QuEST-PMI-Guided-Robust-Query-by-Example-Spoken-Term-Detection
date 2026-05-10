@@ -42,19 +42,40 @@ Smith-Waterman reranking → ranked list     O(C·m·n̄)
 ```
 
 ---
+## Repository Structure
 
+```
+PMI-QuEST/
+├── Pmi-QuEST/
+│   ├── pmiquest_system.py      # TFIDFBaseline, HQuEST, PMIQuest classes
+│   ├── dataloader.py           # CSV + JSON data loaders
+│   ├── smith_waterman.py       # Smith-Waterman alignment module
+│   ├── hnsw.py                 # HNSW index wrapper
+│   ├── tfidf.py                # TF-IDF vectoriser
+│   └── bpe.py                  # BPE baseline (for ablation comparison)
+├── Tokenizer/
+│   └── audio_tokenizer_v2.py   # SSL encoder + k-means tokenisation
+├── Experiments/
+│   ├── run_ablation.py         # Groups A–E ablation sweep
+│   ├── run_multi_tokeniser.py  # Table I: cross-tokeniser evaluation
+│   ├── run_layer_sweep.py      # Optimal layer selection per SSL model
+│   ├── bpe_abl.py              # PMI vs BPE bigram comparison
+│   ├── dtw_final.py            # DTW baseline
+│   └── plot_search_times.py    # Figure: per-query search time bar chart
+├── Figures/                    # Paper figures (PDFs)
+├── configs/                    # Hyperparameter configs per tokeniser
+├── data/
+│   └── sample/                 # Toy corpus + queries + relevance for smoke test
+│       ├── corpus.csv
+│       ├── queries.csv
+│       └── relevance.json
+├── run_retrieval.py            
+├── requirements.txt
+├── setup.py
+└── LICENSE
+```
 
-## ⚙️ Hyperparameters
-
-| Parameter | Value | Notes |
-|-----------|-------|-------|
-| τ (PMI threshold) | 0.5 | Stable across τ ∈ [0, 2] |
-| α (bigram weight) | 1.0 | Saturates at α ≥ 1.0 |
-| C (HNSW candidates) | 200 | MAP grows up to C=200 |
-| SW: m₊ / m₋ / g | +2 / −1 / −2 | Match / mismatch / gap |
-| HNSW M | 16 | ef_construction=150, ef_search=200 |
-
-
+--
 
 ## Results
 
@@ -109,9 +130,6 @@ cd PMI-QuEST-PMI-Guided-Robust-Query-by-Example-Spoken-Term-Detection
 
 pip install -r requirements.txt
 ```
-
-**hnswlib** is required for paper-accurate HNSW results:
-
 ```bash
 pip install hnswlib
 ```
@@ -126,7 +144,7 @@ pip install torch torchaudio transformers  # follow pytorch.org for CUDA version
 
 ## Quick Start
 
-### 1. Verify installation on sample data (CPU, ~5 seconds)
+### 1. Verify installation on sample data 
 
 ```bash
 python run_retrieval.py \
@@ -207,40 +225,6 @@ filename,tokens
 
 ---
 
-## Repository Structure
-
-```
-PMI-QuEST/
-├── Pmi-QuEST/
-│   ├── pmiquest_system.py      # TFIDFBaseline, HQuEST, PMIQuest classes
-│   ├── dataloader.py           # CSV + JSON data loaders
-│   ├── smith_waterman.py       # Smith-Waterman alignment module
-│   ├── hnsw.py                 # HNSW index wrapper
-│   ├── tfidf.py                # TF-IDF vectoriser
-│   └── bpe.py                  # BPE baseline (for ablation comparison)
-├── Tokenizer/
-│   └── audio_tokenizer_v2.py   # SSL encoder + k-means tokenisation
-├── Experiments/
-│   ├── run_ablation.py         # Groups A–E ablation sweep
-│   ├── run_multi_tokeniser.py  # Table I: cross-tokeniser evaluation
-│   ├── run_layer_sweep.py      # Optimal layer selection per SSL model
-│   ├── bpe_abl.py              # PMI vs BPE bigram comparison
-│   ├── dtw_final.py            # DTW baseline
-│   └── plot_search_times.py    # Figure: per-query search time bar chart
-├── Figures/                    # Paper figures (PDFs)
-├── configs/                    # Hyperparameter configs per tokeniser
-├── data/
-│   └── sample/                 # Toy corpus + queries + relevance for smoke test
-│       ├── corpus.csv
-│       ├── queries.csv
-│       └── relevance.json
-├── run_retrieval.py           
-├── requirements.txt
-├── setup.py
-└── LICENSE
-```
-
----
 
 ## Citation
 
