@@ -4,7 +4,7 @@
 
 
 
-## 🔴 Live Demo
+## 🔴 Demo
    👉 [**Interactive pipeline demo**](https://akankss.github.io/PMI-QuEST-PMI-Guided-Robust-Query-by-Example-Spoken-Term-Detection/)
 
 
