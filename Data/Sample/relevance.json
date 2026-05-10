@@ -1,0 +1,41 @@
+{
+  "THE_word_00.wav": {
+    "relevant": [
+      "utt_0002.wav",
+      "utt_0037.wav",
+      "utt_0017.wav",
+      "utt_0021.wav",
+      "utt_0048.wav"
+    ]
+  },
+  "THE_word_01.wav": {
+    "relevant": [
+      "THE_word_00.wav",
+      "utt_0005.wav"
+    ]
+  },
+  "THE_word_02.wav": {
+    "relevant": [
+      "utt_0041.wav",
+      "utt_0005.wav",
+      "utt_0037.wav",
+      "utt_0008.wav",
+      "utt_0001.wav"
+    ]
+  },
+  "THE_word_03.wav": {
+    "relevant": [
+      "utt_0045.wav",
+      "utt_0028.wav",
+      "utt_0032.wav",
+      "utt_0046.wav",
+      "utt_0010.wav"
+    ]
+  },
+  "THE_word_04.wav": {
+    "relevant": [
+      "utt_0046.wav",
+      "THE_word_00.wav"
+    ]
+  }
+}
