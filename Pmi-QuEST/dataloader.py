@@ -1,4 +1,12 @@
+"""
+data_loader.py — CSV + relevance loader for BPE-MNG H-QuEST
 
+Public API
+----------
+load_corpus(csv_path)   -> (filenames: List[str], sequences: List[List[int]])
+load_queries(csv_path)  -> (filenames: List[str], sequences: List[List[int]])
+load_relevance(path)    -> Dict[str, List[str]]   # query_stem -> [corpus_stems]
+"""
 
 import sys
 import json
@@ -67,6 +75,11 @@ def load_csv(csv_path: str) -> Dict[str, List[int]]:
     THE_4446-2275-0000.wav,"1 2 3 4 5"
     THE_4446-2275-0000.wav,"1,2,3,4,5"
 
+    The filename column header may be any of:
+        filename | file | name | id | utt_id | query_id  (case-insensitive)
+    The token column header may be any of:
+        data | tokens | token | sequence                 (case-insensitive)
+
     Returns
     -------
     Dict[stem, List[int]]
@@ -115,20 +128,38 @@ def load_csv(csv_path: str) -> Dict[str, List[int]]:
 # ---------------------------------------------------------------------------
 
 def _dict_to_parallel(token_dict: Dict[str, List[int]]) -> Tuple[List[str], List[List[int]]]:
-   
+    """
+    Convert {stem: tokens} dict to two parallel lists (filenames, sequences).
+    Filenames are returned as "<stem>.wav" to match the convention used by
+    infer_ground_truth / load_relevance (which strip extensions anyway).
+    """
     filenames  = [f"{stem}.wav" for stem in token_dict]
     sequences  = list(token_dict.values())
     return filenames, sequences
 
 
 def load_corpus(csv_path: str) -> Tuple[List[str], List[List[int]]]:
-   
+    """
+    Load corpus CSV.
+
+    Returns
+    -------
+    filenames : List[str]   — e.g. ["THE_4446-2275-0000.wav", ...]
+    sequences : List[List[int]]
+    """
     token_dict = load_csv(csv_path)
     return _dict_to_parallel(token_dict)
 
 
 def load_queries(csv_path: str) -> Tuple[List[str], List[List[int]]]:
-   
+    """
+    Load query CSV.
+
+    Returns
+    -------
+    filenames : List[str]
+    sequences : List[List[int]]
+    """
     token_dict = load_csv(csv_path)
     return _dict_to_parallel(token_dict)
 
@@ -138,7 +169,29 @@ def load_queries(csv_path: str) -> Tuple[List[str], List[List[int]]]:
 # ---------------------------------------------------------------------------
 
 def load_relevance(path: str) -> Dict[str, List[str]]:
-   
+    """
+    Load a relevance JSON file.
+
+    Expected format
+    ---------------
+    {
+        "THE_4446-2275-0000.wav": {
+            "relevant": ["4446-2275-0000.flac", ...]
+        },
+        ...
+    }
+
+    Returns
+    -------
+    Dict[query_stem, List[corpus_stem]]
+        Both keys and values have file extensions stripped so they can be
+        matched against the stems produced by load_corpus / load_queries.
+
+    Example
+    -------
+    "THE_4446-2275-0000.wav"  →  query_stem  = "THE_4446-2275-0000"
+    "4446-2275-0000.flac"     →  corpus_stem = "4446-2275-0000"
+    """
     with open(path, encoding="utf-8") as f:
         raw: dict = json.load(f)
 
