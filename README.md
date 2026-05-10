@@ -76,48 +76,8 @@ PMI-QuEST/
 ```
 
 
-## Results
 
-### LibriSpeech test-clean (Q = 200 queries, BEST-STD tokeniser, K = 1024)
 
-| System | MAP | MRR | P@1 | P@5 | P@10 |
-|---|---|---|---|---|---|
-| DTW | 0.4474 | 0.4790 | 0.4591 | 0.1036 | 0.0559 |
-| TF-IDF | 0.5974 | 0.5970 | 0.5891 | 0.1360 | 0.0734 |
-| H-QuEST | 0.6760 | 0.8621 | 0.8539 | 0.2215 | 0.1163 |
-| BEST-STD | 0.7383 | 0.8720 | 0.8586 | 0.2334 | 0.1260 |
-| **PMI-QuEST** | **0.7867** | **0.9809** | **0.9775** | **0.2629** | **0.1427** |
-
-PMI-QuEST achieves **+16.4% relative MAP** over H-QuEST and **+6.6%** over standalone BEST-STD retrieval.
-
-### IndicSUPERB Kathbath — zero-shot cross-lingual (XLS-R-300M, K = 1024)
-
-| Language | TF-IDF MAP | H-QuEST MAP | PMI-QuEST MAP |
-|---|---|---|---|
-| Bengali | 0.5250 | 0.6399 | **0.7190** † |
-| Gujarati | 0.5490 | 0.6349 | **0.7536** † |
-| Hindi | 0.5300 | 0.6377 | **0.7547** † |
-| Kannada | 0.5203 | 0.6364 | **0.7627** † |
-| Malayalam | 0.5299 | 0.6300 | **0.7465** † |
-| Marathi | 0.5357 | 0.6364 | **0.7595** † |
-| Odia | 0.5351 | 0.6297 | **0.7478** † |
-| Punjabi | 0.5352 | 0.6409 | **0.6966** † |
-| Sanskrit | 0.5409 | 0.6420 | **0.7601** † |
-| Tamil | 0.5353 | 0.6367 | **0.7503** † |
-| Telugu | 0.5299 | 0.6320 | **0.7487** † |
-| Urdu | 0.5368 | 0.6391 | **0.7697** † |
-
-† Statistically significant over H-QuEST (paired Wilcoxon, p < 0.05, N = 40).
-
-### Hyperparameters
-
-| Parameter | Value | Notes |
-|---|---|---|
-| τ (PMI threshold) | 0.5 | Stable across τ ∈ [0, 2] |
-| α (bigram weight) | 1.0 | Saturates at α ≥ 1.0 |
-| C (HNSW candidates) | 200 | MAP grows up to C = 200 |
-| SW: m₊ / m₋ / g | +2 / −1 / −2 | Match / mismatch / gap |
-| HNSW M | 16 | ef_construction = 150, ef_search = 200 |
 
 
 ## Installation
@@ -127,9 +87,6 @@ git clone https://github.com/Akankss/PMI-QuEST-PMI-Guided-Robust-Query-by-Exampl
 cd PMI-QuEST-PMI-Guided-Robust-Query-by-Example-Spoken-Term-Detection
 
 pip install -r requirements.txt
-```
-```bash
-pip install hnswlib
 ```
 
 For GPU-accelerated tokenisation (optional, needed only for `audio_tokenizer_v2.py`):
@@ -219,8 +176,49 @@ filename,tokens
   }
 }
 ```
+### Hyperparameters
+
+| Parameter | Value | Notes |
+|---|---|---|
+| τ (PMI threshold) | 0.5 | Stable across τ ∈ [0, 2] |
+| α (bigram weight) | 1.0 | Saturates at α ≥ 1.0 |
+| C (HNSW candidates) | 200 | MAP grows up to C = 200 |
+| SW: m₊ / m₋ / g | +2 / −1 / −2 | Match / mismatch / gap |
+| HNSW M | 16 | ef_construction = 150, ef_search = 200 |
 
 
+## Results
+
+### LibriSpeech test-clean (Q = 200 queries, BEST-STD tokeniser, K = 1024)
+
+| System | MAP | MRR | P@1 | P@5 | P@10 |
+|---|---|---|---|---|---|
+| DTW | 0.4474 | 0.4790 | 0.4591 | 0.1036 | 0.0559 |
+| TF-IDF | 0.5974 | 0.5970 | 0.5891 | 0.1360 | 0.0734 |
+| H-QuEST | 0.6760 | 0.8621 | 0.8539 | 0.2215 | 0.1163 |
+| BEST-STD | 0.7383 | 0.8720 | 0.8586 | 0.2334 | 0.1260 |
+| **PMI-QuEST** | **0.7867** | **0.9809** | **0.9775** | **0.2629** | **0.1427** |
+
+PMI-QuEST achieves **+16.4% relative MAP** over H-QuEST and **+6.6%** over standalone BEST-STD retrieval.
+
+### IndicSUPERB Kathbath — zero-shot cross-lingual (XLS-R-300M, K = 1024)
+
+| Language | TF-IDF MAP | H-QuEST MAP | PMI-QuEST MAP |
+|---|---|---|---|
+| Bengali | 0.5250 | 0.6399 | **0.7190** † |
+| Gujarati | 0.5490 | 0.6349 | **0.7536** † |
+| Hindi | 0.5300 | 0.6377 | **0.7547** † |
+| Kannada | 0.5203 | 0.6364 | **0.7627** † |
+| Malayalam | 0.5299 | 0.6300 | **0.7465** † |
+| Marathi | 0.5357 | 0.6364 | **0.7595** † |
+| Odia | 0.5351 | 0.6297 | **0.7478** † |
+| Punjabi | 0.5352 | 0.6409 | **0.6966** † |
+| Sanskrit | 0.5409 | 0.6420 | **0.7601** † |
+| Tamil | 0.5353 | 0.6367 | **0.7503** † |
+| Telugu | 0.5299 | 0.6320 | **0.7487** † |
+| Urdu | 0.5368 | 0.6391 | **0.7697** † |
+
+† Statistically significant over H-QuEST (paired Wilcoxon, p < 0.05, N = 40).
 
 ## Citation
 
