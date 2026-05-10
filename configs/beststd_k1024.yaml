@@ -1,0 +1,20 @@
+# PMI-QuEST — BEST-STD tokeniser, K=1024
+# Reproduces Table I headline row: MAP=0.7867, MRR=0.9809, P@1=0.9775
+
+tokeniser: beststd
+K: 1024
+layer: null          # BEST-STD has no intermediate layers
+
+pmi_tau: 0.5         # PMI threshold τ
+alpha: 1.0           # bigram weight α
+candidates: 200      # HNSW candidate count C
+
+hnsw:
+  M: 16
+  ef_construction: 150
+  ef_search: 200
+
+smith_waterman:
+  match: 2.0
+  mismatch: -1.0
+  gap: -2.0

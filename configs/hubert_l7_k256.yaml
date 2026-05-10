@@ -1,0 +1,20 @@
+# PMI-QuEST — HuBERT-base tokeniser, Layer 7, K=256
+# Reproduces Table II HuBERT K=256 row: MAP=0.5624
+
+tokeniser: hubert-base
+K: 256
+layer: 7
+
+pmi_tau: 0.5
+alpha: 1.0
+candidates: 200
+
+hnsw:
+  M: 16
+  ef_construction: 150
+  ef_search: 200
+
+smith_waterman:
+  match: 2.0
+  mismatch: -1.0
+  gap: -2.0

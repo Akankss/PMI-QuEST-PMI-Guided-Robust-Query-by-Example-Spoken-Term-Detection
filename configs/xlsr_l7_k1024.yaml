@@ -1,0 +1,24 @@
+# PMI-QuEST — XLS-R-300M tokeniser, Layer 7, K=1024
+# Used for IndicSUPERB Kathbath cross-lingual evaluation (Table III)
+# PMI statistics estimated independently per target language corpus
+
+tokeniser: xlsr-300m
+K: 1024
+layer: 7
+
+pmi_tau: 0.5
+alpha: 1.0
+candidates: 200
+
+hnsw:
+  M: 16
+  ef_construction: 150
+  ef_search: 200
+
+smith_waterman:
+  match: 2.0
+  mismatch: -1.0
+  gap: -2.0
+
+# Languages evaluated: Bengali, Gujarati, Hindi, Kannada, Malayalam,
+# Marathi, Odia, Punjabi, Sanskrit, Tamil, Telugu, Urdu
