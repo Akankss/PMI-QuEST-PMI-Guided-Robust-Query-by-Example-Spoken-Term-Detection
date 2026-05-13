@@ -17,10 +17,6 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
-
 def _raise_field_size_limit() -> None:
     """Set csv.field_size_limit to the largest value the platform supports."""
     max_int = sys.maxsize
@@ -61,9 +57,6 @@ def _detect_columns(fieldnames: List[str]) -> Tuple[str, str]:
     return fname_col, data_col
 
 
-# ---------------------------------------------------------------------------
-# Core loader
-# ---------------------------------------------------------------------------
 
 def load_csv(csv_path: str) -> Dict[str, List[int]]:
     """
@@ -123,10 +116,6 @@ def load_csv(csv_path: str) -> Dict[str, List[int]]:
     return tokens
 
 
-# ---------------------------------------------------------------------------
-# Public corpus / query loaders
-# ---------------------------------------------------------------------------
-
 def _dict_to_parallel(token_dict: Dict[str, List[int]]) -> Tuple[List[str], List[List[int]]]:
     """
     Convert {stem: tokens} dict to two parallel lists (filenames, sequences).
@@ -164,9 +153,6 @@ def load_queries(csv_path: str) -> Tuple[List[str], List[List[int]]]:
     return _dict_to_parallel(token_dict)
 
 
-# ---------------------------------------------------------------------------
-# Relevance loader
-# ---------------------------------------------------------------------------
 
 def load_relevance(path: str) -> Dict[str, List[str]]:
     """
