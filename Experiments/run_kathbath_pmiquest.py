@@ -10,20 +10,9 @@ Key design decisions:
      — Pretrained on 128 languages including all 12 Indic ones
      — Layer 7 (our sweep found this to be the peak; transferable
        to XLS-R since it has the same transformer architecture)
-     — k=100 clusters (same as LibriSpeech experiments)
+     — k=1024 clusters (same as LibriSpeech experiments)
 
-  2. MTWV scoring, not MAP
-     — IndicSUPERB QbE is a pairwise detection task (match/no-match)
-     — Our PMI-TF-IDF cosine score serves directly as the detection
-       score; MTWV is then maximised over a threshold sweep
-
-  3. Caching
-     — k-means centroids and token CSVs are cached per language
-     — Re-runs use cached files unless --force
-
-  4. All three systems reported: TF-IDF, H-QuEST, PMI-QuEST
-     — Exactly matching our LibriSpeech comparison table
-
+  
 Usage
 -----
 python run_kathbath_pmiquest.py \\
