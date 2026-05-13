@@ -1,8 +1,5 @@
 """
 HNSW (Hierarchical Navigable Small World) approximate nearest neighbour index.
-
-Pure numpy/scipy implementation for cosine similarity search,
-matching the H-QuEST configuration: ef_construction=150, M=16.
 """
 
 import numpy as np
@@ -10,6 +7,7 @@ import heapq
 import random
 from typing import List, Tuple, Dict, Set, Optional
 from scipy.sparse import csr_matrix, issparse
+import math
 
 
 def _cosine_distance(a: np.ndarray, b: np.ndarray) -> float:
@@ -64,9 +62,7 @@ class HNSWIndex:
         self._max_layer: int = 0
         self.n_items: int = 0
 
-    # ------------------------------------------------------------------
-    # Building
-    # ------------------------------------------------------------------
+
 
     def add_items(self, matrix) -> None:
         """
@@ -136,9 +132,6 @@ class HNSWIndex:
             self._max_layer = level
             self._entry_point = idx
 
-    # ------------------------------------------------------------------
-    # Searching
-    # ------------------------------------------------------------------
 
     def search(self,
                query: np.ndarray,
@@ -166,9 +159,7 @@ class HNSWIndex:
         candidates.sort()
         return candidates[:k]
 
-    # ------------------------------------------------------------------
-    # Internal graph traversal
-    # ------------------------------------------------------------------
+
 
     def _greedy_search(self, query: np.ndarray, ep: int, layer: int) -> int:
         """Single greedy step: move to closest neighbour at given layer."""
@@ -240,5 +231,3 @@ class HNSWIndex:
         return int(-math.log(self._rng.random()) * self.ml)
 
 
-# Need math for _random_level
-import math
