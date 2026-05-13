@@ -3,7 +3,7 @@
 
 tokeniser: beststd
 K: 1024
-layer: null          # BEST-STD has no intermediate layers
+layer: null         
 
 pmi_tau: 0.5         # PMI threshold τ
 alpha: 1.0           # bigram weight α
