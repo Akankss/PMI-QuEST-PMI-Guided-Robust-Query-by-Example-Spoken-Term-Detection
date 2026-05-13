@@ -13,7 +13,7 @@ Sub-groups
   G2 — BPE vocab sizes: 256, 512, 1024, 2048, 4096
   G3 — BPE min-frequency threshold: 2, 5, 10, 20, 50
   G4 — BPE + PMI-bigrams vs BPE-only (no PMI bigrams)
-  G5 — BPE applied to corpus-only vs corpus+queries    [coverage study]
+ 
 
 Design notes
 ------------
@@ -32,7 +32,7 @@ Usage
         --queries   query_tokens.csv  \\
         --relevance relevance.json    \\
         --out       results/ablation_bpe.csv \\
-        --groups    G1G2G3G4G5
+        --groups    G1G2G3G4
 """
 
 from __future__ import annotations
@@ -407,76 +407,10 @@ def main():
                     use_pmi_bigrams=use_pmi,
                 ))
 
-    # ── G5: Query coverage — corpus-only BPE vs joint BPE ─────────
-    if "G5" in G:
-        print("\n" + "─" * 55)
-        print("Group G5: BPE Coverage — corpus-only vs corpus+query fit")
-        print("─" * 55)
+    
 
-        for vocab_size in [1024, 2048]:
-            # Corpus-only fit (standard; queries see OOV synthetic tokens)
-            rows.append(run_variant(
-                tag=f"G5_v{vocab_size}_corpusonly", group="G5",
-                description=f"BPE vocab={vocab_size}  fit=corpus-only",
-                corpus_seqs=corpus_seqs, query_seqs=query_seqs,
-                ground_truth=ground_truth,
-                bpe=IntegerBPE(
-                    vocab_size=vocab_size,
-                    min_frequency=2,
-                    fit_on_corpus_only=True,
-                ),
-            ))
+          
 
-            # Joint fit (queries included in BPE training — data-leakage
-            # risk in practice, but informative upper bound on coverage)
-            joint_bpe = IntegerBPE(
-                vocab_size=vocab_size,
-                min_frequency=2,
-                fit_on_corpus_only=False,
-            )
-            joint_bpe.fit(corpus_seqs + query_seqs)
-            enc_corpus  = joint_bpe.encode(corpus_seqs)
-            enc_queries = joint_bpe.encode(query_seqs)
-
-            # Run manually so we can pass pre-encoded sequences
-            print(f"\n  [G5] G5_v{vocab_size}_joint: "
-                  f"BPE vocab={vocab_size}  fit=corpus+queries  "
-                  f"(upper-bound coverage)")
-            t0 = time.time()
-            system = proposed_system()
-            system.fit(enc_corpus)
-            ranked  = [system.rank(q) for q in enc_queries]
-            metrics = evaluate(ranked, ground_truth)
-            elapsed = time.time() - t0
-            n_pmi = (
-                len(system.pmi_tfidf.bi_vocab)
-                if hasattr(system, "pmi_tfidf") and system.use_pmi_bigrams
-                else 0
-            )
-            row = {
-                "group":           "G5",
-                "tag":             f"G5_v{vocab_size}_joint",
-                "description":     f"BPE vocab={vocab_size}  fit=corpus+queries",
-                "bpe_vocab_size":  vocab_size,
-                "bpe_min_freq":    2,
-                "bpe_merges_done": joint_bpe.n_merges_applied_,
-                "effective_vocab": joint_bpe.base_vocab_size_ + joint_bpe.n_merges_applied_,
-                "use_pmi_bigrams": True,
-                "n_pmi_bigrams":   n_pmi,
-                "MAP":  round(metrics["MAP"],  4),
-                "P@1":  round(metrics["P@1"],  4),
-                "P@5":  round(metrics["P@5"],  4),
-                "P@10": round(metrics["P@10"], 4),
-                "MRR":  round(metrics.get("MRR", float("nan")), 4),
-                "time_s": round(elapsed, 1),
-            }
-            rows.append(row)
-            print(
-                f"    MAP={row['MAP']:.4f}  P@1={row['P@1']:.4f}  "
-                f"MRR={row['MRR']:.4f}  [{elapsed:.1f}s]"
-            )
-
-    # ── save CSV ──────────────────────────────────────────────────
     if rows:
         os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
         with open(args.out, "w", newline="") as f:
@@ -485,7 +419,6 @@ def main():
             w.writerows(rows)
         print(f"\n  Saved → {args.out}")
 
-    # ── console summary ───────────────────────────────────────────
     print()
     print("=" * 65)
     print(
