@@ -5,7 +5,7 @@ Converts the qbe_indicsuperb dataset into per-language
 corpus_files.csv / query_files.csv / relevance.json / all_pairs.json
 ready for run_kathbath_pmiquest.py.
 
-ACTUAL dataset structure (confirmed from inspection):
+ACTUAL dataset structure:
   qbe_indicsuperb/
     <lang>/
       Audio/           ← corpus utterances (.wav, already 16 kHz)
