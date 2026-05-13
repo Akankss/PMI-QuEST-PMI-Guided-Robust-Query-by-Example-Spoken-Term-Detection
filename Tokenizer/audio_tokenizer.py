@@ -7,21 +7,6 @@ sequences compatible with pmiquest_system.py.
 All three models share the same 20ms frame rate (CNN stride), so token
 counts are directly comparable across models for a given audio file.
 
-Recommended layer per model
----------------------------
-  wav2vec2-base / large   : CNN output (layer 0) — current default
-                            OR transformer layer 6 (base) / 9 (large)
-  hubert-base             : transformer layer 6  ← standard for QbE-STD
-  hubert-large            : transformer layer 9
-  wavlm-base              : transformer layer 6
-  wavlm-base-plus         : transformer layer 6
-  wavlm-large             : transformer layer 6 or 9
-
-Layer 6 (base) and layer 9 (large) are the standard choices in the HuBERT
-and WavLM papers for extracting discrete speech units.  The CNN-only
-extraction used for wav2vec2 in our QbE-STD work is also valid but gives
-context-free features; transformer layers give contextual features that
-typically yield cleaner k-means clusters for phoneme-like units.
 
 Usage examples
 --------------
@@ -33,15 +18,6 @@ python audio_tokenizer_v2.py \\
     --layer       6 \\
     --n_clusters  100 \\
     --out_dir     qbe_librispeech/hubert_base_l6_k100
-
-# Tokenise with WavLM-base layer 6, k=200
-python audio_tokenizer_v2.py \\
-    --corpus_dir  qbe_librispeech/corpus_audio \\
-    --query_dir   qbe_librispeech/query_audio \\
-    --model       wavlm-base \\
-    --layer       6 \\
-    --n_clusters  200 \\
-    --out_dir     qbe_librispeech/wavlm_base_l6_k200
 
 # Load existing centroids (skip k-means fitting)
 python audio_tokenizer_v2.py \\
@@ -73,11 +49,8 @@ import soundfile as sf
 from tqdm import tqdm
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Model registry
-# ─────────────────────────────────────────────────────────────────────────────
 
-# Maps CLI name → HuggingFace model ID
+
 MODEL_IDS = {
     # wav2vec 2.0
     "wav2vec2-base":         "facebook/wav2vec2-base",
@@ -95,7 +68,7 @@ MODEL_IDS = {
     "wavlm-large":           "microsoft/wavlm-large",
 }
 
-# Recommended transformer layer per model (for phoneme-quality tokens)
+
 RECOMMENDED_LAYER = {
     "wav2vec2-base":         6,    # CNN (layer=0) or transformer layer 6
     "wav2vec2-large":        9,
@@ -108,7 +81,7 @@ RECOMMENDED_LAYER = {
     "wavlm-large":           6,    # WavLM paper recommends layer 6 for tokens
 }
 
-# Feature dimension per model
+
 FEATURE_DIM = {
     "wav2vec2-base":         768,   # transformer hidden; CNN is 512
     "wav2vec2-large":        1024,
@@ -122,9 +95,7 @@ FEATURE_DIM = {
 }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Audio loading
-# ─────────────────────────────────────────────────────────────────────────────
+
 
 def load_audio(path: str, target_sr: int = 16000) -> np.ndarray:
     """Load audio file → float32 mono numpy array at 16kHz."""
@@ -139,9 +110,6 @@ def load_audio(path: str, target_sr: int = 16000) -> np.ndarray:
     return audio
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Feature extractor — unified for all three model families
-# ─────────────────────────────────────────────────────────────────────────────
 
 class SpeechFeatureExtractor:
     """
@@ -291,9 +259,6 @@ class SpeechFeatureExtractor:
         return self.extract(load_audio(str(path)))
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# K-means tokeniser — wraps feature extractor
-# ─────────────────────────────────────────────────────────────────────────────
 
 class KMeansTokenizer:
     """
@@ -328,7 +293,7 @@ class KMeansTokenizer:
         self.extractor   = SpeechFeatureExtractor(model_name, layer, device)
         self.kmeans      = None
 
-    # ── fitting ──────────────────────────────────────────────────────────────
+
 
     def fit(self, audio_paths: list, max_frames: int = 500_000):
         """
@@ -409,7 +374,7 @@ class KMeansTokenizer:
                       f"but you are using {self.model_name} layer={self.layer}.")
         print(f"  Loaded {len(centers)} centroids from {path}")
 
-    # ── tokenisation ─────────────────────────────────────────────────────────
+
 
     def tokenize(self, audio: np.ndarray) -> list:
         """Tokenise a single audio array → list of int token ids."""
@@ -426,10 +391,6 @@ class KMeansTokenizer:
         """Short string tag for file naming, e.g. 'hubert-base_l6_k100'."""
         return f"{self.model_name}_l{self.layer}_k{self.n_clusters}"
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Multi-model runner — produce CSVs for all requested configs in one shot
-# ─────────────────────────────────────────────────────────────────────────────
 
 def run_multi_model(
     corpus_dir: str,
@@ -535,10 +496,6 @@ python run_pmiquest_comparison.py \\
     --ablation""")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Helpers
-# ─────────────────────────────────────────────────────────────────────────────
-
 def _tokenize_files(paths: list, tok: KMeansTokenizer, desc: str) -> list:
     """Tokenise a list of audio paths → list of (filename, tokens) tuples."""
     rows = []
@@ -568,10 +525,6 @@ def _print_stats(rows: list, tag: str):
           f"  mean={np.mean(lengths):.1f}  vocab={len(vocab)}")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CLI
-# ─────────────────────────────────────────────────────────────────────────────
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Tokenise audio with wav2vec2 / HuBERT / WavLM + k-means",
@@ -579,7 +532,6 @@ if __name__ == "__main__":
         epilog=__doc__,
     )
 
-    # ── Model selection ───────────────────────────────────────────────────────
     parser.add_argument(
         "--model", default="wav2vec2-base",
         choices=list(MODEL_IDS.keys()),
@@ -595,14 +547,13 @@ if __name__ == "__main__":
         help="K-means vocabulary size V (default: 100).",
     )
 
-    # ── Multi-model mode ──────────────────────────────────────────────────────
+
     parser.add_argument(
         "--all_models", action="store_true",
         help="Run all three base models (wav2vec2-base l6, hubert-base l6, "
              "wavlm-base l6) with k=100.  Ignores --model/--layer.",
     )
 
-    # ── I/O ───────────────────────────────────────────────────────────────────
     parser.add_argument("--corpus_dir",  required=True,
                         help="Directory of corpus .wav/.flac files.")
     parser.add_argument("--query_dir",   required=True,
@@ -621,7 +572,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # Resolve layer default
+
     layer = args.layer if args.layer is not None else RECOMMENDED_LAYER.get(args.model, 6)
 
     if args.all_models:
@@ -661,7 +612,7 @@ if __name__ == "__main__":
             tok.fit([str(p) for p in corpus_paths], max_frames=args.max_frames)
             tok.save_centroids(centroid_path)
 
-        # Tokenise corpus
+
         corpus_paths = (
             sorted(Path(args.corpus_dir).glob("*.wav")) +
             sorted(Path(args.corpus_dir).glob("*.flac"))
@@ -670,7 +621,7 @@ if __name__ == "__main__":
         _write_csv(corpus_rows, str(out_dir / "corpus.csv"))
         _print_stats(corpus_rows, "corpus")
 
-        # Tokenise queries
+
         query_paths = (
             sorted(Path(args.query_dir).glob("*.wav")) +
             sorted(Path(args.query_dir).glob("*.flac"))
