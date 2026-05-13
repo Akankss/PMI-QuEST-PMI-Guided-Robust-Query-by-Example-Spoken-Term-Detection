@@ -1,12 +1,5 @@
 """
 Smith-Waterman local sequence alignment for QbE-STD re-ranking.
-
-Used as the second-stage re-ranker in H-QuEST: given a query sequence
-and a set of candidate sequences from HNSW, Smith-Waterman computes
-an alignment score that is more precise than cosine similarity.
-
-With BPE compression, sequences are shorter (L' < L), making the
-O(KL'^2) re-ranking step measurably faster than on raw sequences.
 """
 
 import numpy as np
@@ -19,19 +12,10 @@ def smith_waterman_score(query: List[int],
                          mismatch_penalty: float = -1.0,
                          gap_penalty: float = -1.0) -> float:
     """
-    Compute the Smith-Waterman local alignment score between two sequences.
-
-    The algorithm finds the highest-scoring locally aligned subsequence,
-    allowing gaps. A higher score indicates stronger local similarity —
-    ideal for QbE-STD where the query term may appear anywhere within
-    a longer utterance.
-
-    Time complexity: O(|query| * |candidate|)
-    Space complexity: O(|query| * |candidate|)
-
+    
     Args:
-        query: Query token sequence (BPE-compressed).
-        candidate: Candidate token sequence (BPE-compressed).
+        query: Query token sequence.
+        candidate: Candidate token sequence.
         match_score: Score added for matching tokens.
         mismatch_penalty: Score added for mismatched tokens (negative).
         gap_penalty: Score added for inserting a gap (negative).
@@ -103,9 +87,9 @@ def rerank(query_seq: List[int],
     local alignment score. This is Stage 3 of BPE-MNG H-QuEST.
 
     Args:
-        query_seq: BPE-compressed query sequence.
+        query_seq: Query sequence.
         candidates: List of (cosine_distance, corpus_idx) from HNSW.
-        corpus_sequences: All BPE-compressed corpus sequences.
+        corpus_sequences: Corpus sequences.
         match_score, mismatch_penalty, gap_penalty: SW parameters.
 
     Returns:
