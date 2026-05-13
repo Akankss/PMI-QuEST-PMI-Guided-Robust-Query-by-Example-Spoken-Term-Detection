@@ -1,5 +1,4 @@
-# PMI-QuEST — HuBERT-base tokeniser, Layer 7, K=256
-# Reproduces Table II HuBERT K=256 row: MAP=0.5624
+
 
 tokeniser: hubert-base
 K: 256
