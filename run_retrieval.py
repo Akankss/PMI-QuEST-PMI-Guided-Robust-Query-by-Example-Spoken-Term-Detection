@@ -53,7 +53,6 @@ import time
 from pathlib import Path
 from typing import Dict, List, Set
 
-# ── resolve imports whether run from repo root or Pmi-QuEST/ ─────────────────
 _HERE = Path(__file__).resolve().parent
 for _candidate in [_HERE, _HERE / "Pmi-QuEST"]:
     if (_candidate / "pmiquest_system.py").exists():
@@ -64,9 +63,7 @@ from dataloader import load_corpus, load_queries, load_relevance
 from pmiquest_system import TFIDFBaseline, HQuEST, PMIQuest, evaluate
 
 
-# =============================================================================
-# Ground-truth builder
-# =============================================================================
+
 
 def build_ground_truth(
     query_filenames:  List[str],
@@ -96,9 +93,6 @@ def build_ground_truth(
     return gt
 
 
-# =============================================================================
-# Single-system runner
-# =============================================================================
 
 def run_system(name: str, system, corpus_seqs, query_seqs, ground_truth):
     t0 = time.time()
@@ -117,10 +111,6 @@ def _fmt(m: Dict) -> str:
         f"  [{m['time_s']:.1f}s]"
     )
 
-
-# =============================================================================
-# CLI
-# =============================================================================
 
 def parse_args():
     p = argparse.ArgumentParser(
@@ -165,7 +155,7 @@ def parse_args():
 def main():
     args = parse_args()
 
-    # ── Load data ─────────────────────────────────────────────────────────────
+
     if not args.quiet:
         print("Loading data ...")
     corpus_filenames, corpus_seqs = load_corpus(args.corpus)
@@ -182,7 +172,7 @@ def main():
             f"Queries: {len(query_seqs)} ({n_with_rel} with relevant docs)\n"
         )
 
-    # ── Build systems ─────────────────────────────────────────────────────────
+
     sw_kw = dict(
         sw_match=args.sw_match,
         sw_mismatch=args.sw_mismatch,
@@ -202,7 +192,7 @@ def main():
             **sw_kw,
         )))
 
-    # ── Run ───────────────────────────────────────────────────────────────────
+
     results = []
     print("=" * 68)
     for name, system in systems_to_run:
@@ -213,7 +203,7 @@ def main():
         print(f"  {name:<12}  {_fmt(m)}")
     print("=" * 68)
 
-    # ── Summary table (multi-system) ──────────────────────────────────────────
+
     if len(results) > 1:
         print()
         print(f"  {'System':<14} {'MAP':>7} {'MRR':>7} {'P@1':>7} {'P@5':>7} {'P@10':>7}")
@@ -226,7 +216,7 @@ def main():
             )
         print()
 
-    # ── Optional CSV output ───────────────────────────────────────────────────
+
     if args.out:
         os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
         write_header = not Path(args.out).exists()
