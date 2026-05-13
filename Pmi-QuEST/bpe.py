@@ -15,7 +15,7 @@ class AudioBPE:
 
     Learns K merge operations from a corpus, then applies them
     to compress token sequences. Frequent bigrams become atomic tokens,
-    leaving only rarer patterns as separate tokens — directly
+    leaving only rarer patterns as separate tokens directly
     complementing TF-IDF's IDF mechanism.
     """
 
@@ -32,9 +32,7 @@ class AudioBPE:
         self.vocab_size: int = 0               # base vocab size before merges
         self.is_fitted: bool = False
 
-    # ------------------------------------------------------------------
-    # Fitting
-    # ------------------------------------------------------------------
+
 
     def fit(self, sequences: List[List[int]]) -> "AudioBPE":
         """
@@ -49,12 +47,11 @@ class AudioBPE:
         if not sequences:
             raise ValueError("Cannot fit BPE on empty corpus.")
 
-        # Determine base vocabulary size from the data
         all_tokens = {t for seq in sequences for t in seq}
         self.vocab_size = max(all_tokens) + 1
         next_token_id = self.vocab_size
 
-        # Work on mutable copies
+
         corpus = [list(seq) for seq in sequences]
 
         print(f"[BPE] Fitting on {len(corpus)} sequences, "
@@ -62,7 +59,7 @@ class AudioBPE:
               f"num_merges = {self.num_merges}")
 
         for merge_idx in range(self.num_merges):
-            # Count all adjacent pairs across the entire corpus
+           
             pair_counts = Counter()
             for seq in corpus:
                 for i in range(len(seq) - 1):
@@ -72,18 +69,18 @@ class AudioBPE:
                 print(f"[BPE] No more pairs to merge at step {merge_idx}. Stopping.")
                 break
 
-            # Find most frequent pair
+  
             best_pair, best_count = pair_counts.most_common(1)[0]
 
             if best_count < 2:
                 print(f"[BPE] All remaining pairs occur only once. Stopping at step {merge_idx}.")
                 break
 
-            # Record the merge
+       
             self.merges.append(best_pair)
             self.merge_map[best_pair] = next_token_id
 
-            # Apply merge to entire corpus
+
             corpus = [self._apply_merge(seq, best_pair, next_token_id)
                       for seq in corpus]
 
@@ -99,9 +96,6 @@ class AudioBPE:
               f"Final vocab size = {next_token_id}.")
         return self
 
-    # ------------------------------------------------------------------
-    # Transformation
-    # ------------------------------------------------------------------
 
     def transform(self, sequences: List[List[int]]) -> List[List[int]]:
         """
@@ -121,10 +115,6 @@ class AudioBPE:
         """Fit and transform in one step."""
         self.fit(sequences)
         return self.transform(sequences)
-
-    # ------------------------------------------------------------------
-    # Internal helpers
-    # ------------------------------------------------------------------
 
     def _apply_merge(self,
                      seq: List[int],
@@ -149,9 +139,6 @@ class AudioBPE:
             seq = self._apply_merge(seq, pair, new_token)
         return seq
 
-    # ------------------------------------------------------------------
-    # Analysis utilities
-    # ------------------------------------------------------------------
 
     def get_merge_frequencies(self,
                               sequences: List[List[int]]) -> List[Tuple[Tuple, int]]:
