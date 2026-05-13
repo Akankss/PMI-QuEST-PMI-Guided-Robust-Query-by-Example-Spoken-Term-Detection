@@ -32,8 +32,6 @@ python run_multi_tokeniser.py \\
     --relevance relevance.json \\
     --out results/multi_tokeniser.csv
 
-# Cap DTW to 5 000 corpus docs per query (for large corpora):
-    --dtw_max_docs 5000
 """
 
 import argparse
@@ -48,9 +46,6 @@ import numpy as np
 
 csv.field_size_limit(sys.maxsize)
 
-# ---------------------------------------------------------------------------
-# Import retrieval systems
-# ---------------------------------------------------------------------------
 try:
     from pmiquest_system import TFIDFBaseline, HQuEST, PMIQuest, evaluate
 except ImportError:
@@ -58,8 +53,6 @@ except ImportError:
     from pmiquest_system import TFIDFBaseline, HQuEST, PMIQuest, evaluate
 
 
-# ===========================================================================
-# Token-DTW baseline
 # ===========================================================================
 
 class TokenDTW:
@@ -173,9 +166,7 @@ class TokenDTW:
         return ranked_subset + ranked_missing
 
 
-# ===========================================================================
-# I/O helpers
-# ===========================================================================
+
 
 def load_csv(csv_path: str) -> Dict[str, List[int]]:
     """
@@ -243,9 +234,6 @@ def load_relevance(path: str) -> Dict[str, List[str]]:
     return result
 
 
-# ===========================================================================
-# Evaluation  (MAP, MRR, P@1/5/10)
-# ===========================================================================
 
 def _eval(ranked_lists: Dict[str, List[str]],
           relevance:    Dict[str, List[str]]) -> Dict[str, float]:
@@ -283,9 +271,6 @@ def _eval(ranked_lists: Dict[str, List[str]],
     }
 
 
-# ===========================================================================
-# Single-config runner
-# ===========================================================================
 
 def run_one_config(
     label:        str,
@@ -411,9 +396,6 @@ def run_one_config(
     return results
 
 
-# ===========================================================================
-# Pretty-print table
-# ===========================================================================
 
 def print_table(all_results: list):
     W = 95
@@ -454,9 +436,6 @@ def print_table(all_results: list):
     print("─" * W)
 
 
-# ===========================================================================
-# Save CSV
-# ===========================================================================
 
 def save_csv(all_results: list, path: str):
     fields = [
@@ -475,10 +454,6 @@ def save_csv(all_results: list, path: str):
         w.writerows(all_results)
     print(f"\n  Saved → {path}")
 
-
-# ===========================================================================
-# CLI
-# ===========================================================================
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
