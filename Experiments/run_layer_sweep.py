@@ -2,19 +2,13 @@
 Layer Sweep — PMI-QuEST across transformer layers
 ===================================================
 Tokenises corpus + queries for each (model, layer) combination and runs
-PMI-QuEST evaluation, producing a single CSV and printed table suitable
-for Figure X / Table Y in the paper.
+PMI-QuEST evaluation.
 
 Default sweep:
   wav2vec2-base  layers: 0 (CNN), 3, 6, 7, 9, 12
   hubert-base    layers: 3, 6, 7, 9, 12
   wavlm-base     layers: 3, 6, 7, 9, 12
-
-Each config produces:
-  out_dir/<model>_l<layer>_k100/corpus.csv
-  out_dir/<model>_l<layer>_k100/queries.csv
-  out_dir/<model>_l<layer>_k100/kmeans_centroids.npy   (cached)
-
+  
 Already-tokenised configs are loaded from cache and skipped.
 
 Usage
@@ -50,7 +44,7 @@ from typing import List, Optional
 
 import numpy as np
 
-# ── import tokeniser ──────────────────────────────────────────────────────────
+
 sys.path.insert(0, str(Path(__file__).parent))
 try:
     from audio_tokenizer_v2 import KMeansTokenizer, load_audio, _write_csv
@@ -60,7 +54,7 @@ except ImportError:
         "Place it in the same directory as this script."
     )
 
-# ── import retrieval systems ──────────────────────────────────────────────────
+
 try:
     from pmiquest_system import TFIDFBaseline, HQuEST, PMIQuest
 except ImportError:
@@ -70,10 +64,6 @@ except ImportError:
     )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Default sweep configuration
-# ─────────────────────────────────────────────────────────────────────────────
-
 DEFAULT_CONFIGS = [
     # (model_name,    layers_to_sweep)
     ("wav2vec2-base", [0, 3, 6, 7, 9, 12]),   # layer 0 = CNN (context-free)
@@ -82,21 +72,15 @@ DEFAULT_CONFIGS = [
 ]
 
 PMI_TAU     = 0.5    # best MAP config from ablation
-BIGRAM_W    = 0.5    # alpha
-N_CLUSTERS  = 50
-K_CANDS     = 50
+BIGRAM_W    = 1   # alpha
+N_CLUSTERS  = 1024
+K_CANDS     = 200
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# CSV helpers
-# ─────────────────────────────────────────────────────────────────────────────
 
 from pathlib import Path
 import json
 
-# ─────────────────────────────────────────────────────────────────────────────
-# ID NORMALIZATION (CRITICAL FIX)
-# ─────────────────────────────────────────────────────────────────────────────
+
 
 def normalize_id(x: str) -> str:
     """
@@ -154,9 +138,6 @@ def load_relevance(path: str) -> dict:
     return rel
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Tokenisation (with caching)
-# ─────────────────────────────────────────────────────────────────────────────
 
 def tokenise_config(
     model_name:   str,
@@ -224,104 +205,6 @@ def _tokenize_files(paths: list, tok: KMeansTokenizer, desc: str) -> list:
     return rows
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Retrieval evaluation for one config
-# ─────────────────────────────────────────────────────────────────────────────
-
-'''def evaluate_config(
-    model_name:  str,
-    layer:       int,
-    corpus_csv:  str,
-    query_csv:   str,
-    relevance:   dict,
-    verbose:     bool = True,
-) -> dict:
-    """Run TF-IDF, H-QuEST, PMI-QuEST on one tokenised config."""
-    corpus  = load_csv(corpus_csv)
-    queries = load_csv(query_csv)
-
-    corpus_list = list(corpus.values())
-    corpus_ids  = list(corpus.keys())
-    query_ids   = list(queries.keys())
-
-    vocab_size  = len(set(t for s in corpus_list for t in s))
-    mean_q      = np.mean([len(s) for s in queries.values()])
-    mean_c      = np.mean([len(s) for s in corpus_list])
-    rho         = mean_q / mean_c
-    tag         = f"{model_name}_l{layer}_k{N_CLUSTERS}"
-
-    if verbose:
-        print(f"\n  Evaluating {tag}  "
-              f"V={vocab_size}  mean_q={mean_q:.1f}  rho={rho:.3f}")
-
-    row = {
-        "model": model_name, "layer": layer, "tag": tag,
-        "vocab_size": vocab_size, "mean_q_len": mean_q,
-        "mean_c_len": mean_c, "rho": rho,
-    }
-
-    def rank_and_translate(system):
-        return {
-            qid: [corpus_ids[i] for i in system.rank(queries[qid])
-                  if i < len(corpus_ids)]
-            for qid in query_ids if qid in relevance
-        }
-
-    def _eval(ranked_lists):
-        aps, p1s, p5s, p10s = [], [], [], []
-        for qid, ranked in ranked_lists.items():
-            if qid not in relevance:
-                continue
-            rel = set(relevance[qid])
-            n_rel, ap = 0, 0.0
-            for rank, did in enumerate(ranked, 1):
-                if did in rel:
-                    n_rel += 1
-                    ap += n_rel / rank
-            aps.append(ap / max(len(rel), 1))
-            p1s.append(1.0 if ranked and ranked[0] in rel else 0.0)
-            p5s.append(sum(1 for d in ranked[:5]  if d in rel) / 5)
-            p10s.append(sum(1 for d in ranked[:10] if d in rel) / 10)
-        return {
-            "map": float(np.mean(aps)), "p1": float(np.mean(p1s)),
-            "p5": float(np.mean(p5s)),  "p10": float(np.mean(p10s)),
-        }
-
-    # TF-IDF
-    t0 = time.time()
-    bl = TFIDFBaseline()
-    bl.fit(corpus_list)
-    m = _eval(rank_and_translate(bl))
-    row.update({f"tfidf_{k}": v for k, v in m.items()})
-    if verbose:
-        print(f"    TF-IDF:    MAP={m['map']:.4f}  P@1={m['p1']:.4f}  [{time.time()-t0:.1f}s]")
-
-    # H-QuEST
-    t0 = time.time()
-    hq = HQuEST(hnsw_k=K_CANDS)
-    hq.fit(corpus_list)
-    m = _eval(rank_and_translate(hq))
-    row.update({f"hquest_{k}": v for k, v in m.items()})
-    if verbose:
-        print(f"    H-QuEST:   MAP={m['map']:.4f}  P@1={m['p1']:.4f}  [{time.time()-t0:.1f}s]")
-
-    # PMI-QuEST
-    t0 = time.time()
-    pq = PMIQuest(pmi_tau=PMI_TAU, bigram_weight=BIGRAM_W,
-                  use_pmitd=False, hnsw_k=K_CANDS)
-    pq.fit(corpus_list)
-    m = _eval(rank_and_translate(pq))
-    row.update({f"pmi_{k}": v for k, v in m.items()})
-    if verbose:
-        print(f"    PMI-QuEST: MAP={m['map']:.4f}  P@1={m['p1']:.4f}  [{time.time()-t0:.1f}s]")
-
-    # Gains
-    hq_map = row["hquest_map"]
-    hq_p1  = row["hquest_p1"]
-    row["pmi_map_gain"] = (row["pmi_map"] - hq_map) / max(hq_map, 1e-9)
-    row["pmi_p1_gain"]  = (row["pmi_p1"]  - hq_p1)  / max(hq_p1,  1e-9)
-
-    return row'''
 
 
 def evaluate_config(
@@ -336,7 +219,7 @@ def evaluate_config(
     corpus  = load_csv(corpus_csv)
     queries = load_csv(query_csv)
 
-    # 🔥 NORMALIZE IDS
+    
     corpus_ids_raw = list(corpus.keys())
     query_ids_raw  = list(queries.keys())
 
@@ -344,8 +227,6 @@ def evaluate_config(
     query_ids  = [normalize_id(x) for x in query_ids_raw]
 
     corpus_list = list(corpus.values())
-
-    # stats
     vocab_size = len(set(t for s in corpus_list for t in s))
     mean_q     = np.mean([len(s) for s in queries.values()])
     mean_c     = np.mean([len(s) for s in corpus_list])
@@ -363,9 +244,7 @@ def evaluate_config(
         "mean_c_len": mean_c, "rho": rho,
     }
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # FIXED RANKING + MAPPING
-    # ─────────────────────────────────────────────────────────────────────────
+
 
     def rank_and_translate(system):
         ranked = {}
@@ -386,9 +265,6 @@ def evaluate_config(
 
         return ranked
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # FIXED EVALUATION
-    # ─────────────────────────────────────────────────────────────────────────
 
     def _eval(ranked_lists):
         aps, p1s, p5s, p10s = [], [], [], []
@@ -415,7 +291,7 @@ def evaluate_config(
             p5s.append(sum(1 for d in ranked[:5] if d in rel) / 5)
             p10s.append(sum(1 for d in ranked[:10] if d in rel) / 10)
 
-        # 🔥 HANDLE EMPTY SAFELY
+  
         if len(aps) == 0:
             return {"map": 0.0, "p1": 0.0, "p5": 0.0, "p10": 0.0}
 
@@ -426,9 +302,6 @@ def evaluate_config(
             "p10": float(np.mean(p10s)),
         }
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # RUN SYSTEMS
-    # ─────────────────────────────────────────────────────────────────────────
 
     # TF-IDF
     t0 = time.time()
@@ -468,9 +341,6 @@ def evaluate_config(
     return row
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Print table
-# ─────────────────────────────────────────────────────────────────────────────
 
 def print_sweep_table(all_rows: list):
     print(f"\n{'='*80}")
@@ -521,9 +391,7 @@ def save_csv(all_rows: list, path: str):
     print(f"\n  Saved → {path}")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CLI
-# ─────────────────────────────────────────────────────────────────────────────
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
